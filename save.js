@@ -48,7 +48,7 @@ const CL2={st:"off",busy:false,dirty:false,last:"",lastUp:0,t:0,pend:null,
   this.st="on";this.up()},
  apply(o){const old=JSON.parse(JSON.stringify(M));Object.keys(M).forEach(k=>delete M[k]);Object.assign(M,o.m);
   // 两边各自的最好成绩取大的
-  ["best","wins","maxDiff","endBest","playMs"].forEach(k=>{M[k]=Math.max(+M[k]||0,+old[k]||0)});
+  ["best","wins","maxDiff","endBest","playMs","dmgBest","dmgAll"].forEach(k=>{M[k]=Math.max(+M[k]||0,+old[k]||0)});
   lsSet("meta",M);if(o.s&&runRaw()===null){try{localStorage.setItem("np-run",JSON.stringify(o.s))}catch(e){}}
   NPB.save();if(!G&&$("#title.on"))titleScreen();toast("已从云端找回你的存档")},
  soon(){this.dirty=true;clearTimeout(this.t);this.t=setTimeout(()=>this.up(),4000)},
@@ -70,4 +70,9 @@ async function manualSave(){SFX.click();let okL=false;try{if(G&&!G.tut){saveRun(
  let okB=false;try{okB=await NPB.save()}catch(e){}let okC=null;if(CL2.st==="on"){okC=await CL2.up(true)}
  SFX[okL||okB?"shine":"bad"]();toast(okL?(okC===true?"<b>存好了</b>：本机和云端都已保存":okC===false?"<b>本机已保存</b>，云端这次没连上，稍后会自动再传":"<b>本机已保存</b>"+(CL2.st==="none"?"（在 B站 里打开才有云存档）":"")):okB?"<b>存到备份里了</b>：这台设备的普通存储写不进去":"<b>没存上</b>，请不要关闭游戏，稍后再试")}
 {const _gm=gameMenu;gameMenu=function(){_gm.apply(this,arguments);try{const row=$("#ov .menuBtns");if(row&&!$("#mnSave")){const b=document.createElement("button");b.className="btn dark";b.id="mnSave";b.textContent="立即存档";b.onclick=manualSave;row.appendChild(b)}
-  const tp=$("#ov .menuTip");if(tp)tp.innerHTML=`进度在每次进商店、选关时自动保存，本机、本机备份、云端各存一份。${CL2.st==="on"?"云存档：<b>已连上</b>":CL2.st==="none"?"云存档：在 B站 里打开才有":"云存档：连接中"}　在线 ${fmtPlay(M.playMs)}`}catch(e){}}}
+  const tp=$("#ov .menuTip");if(tp)tp.innerHTML=`进度在每次进商店、选关时自动保存，本机、本机备份、云端各存一份。${CL2.st==="on"?"云存档：<b>已连上</b>":CL2.st==="none"?"云存档：在 B站 里打开才有":"云存档：连接中"}　在线 ${fmtPlay(M.playMs)}${M.dmgBest?`<br>最高一局总伤害 ${M.dmgBest.toLocaleString()}　一共打出 ${(M.dmgAll||0).toLocaleString()}`:""}`}catch(e){}}}
+
+/* ---------- 每一局的总伤害：记最高的一局，也记一共打出过多少 ---------- */
+function dmgNote(){try{const S=G&&G.stats;if(!S)return"";if(S.dmgRec)return`<em class="dmgRec">新纪录！</em>`;return M.dmgBest?`<em>最高 ${M.dmgBest.toLocaleString()}</em>`:""}catch(e){return""}}
+{const _re=runEnd;runEnd=function(){const r=_re.apply(this,arguments);try{const S=G&&G.stats;if(S&&!G.tut){const d=S.dmg||0,add=d-(S.dmgSaved||0);if(add>0){M.dmgAll=(M.dmgAll||0)+add;S.dmgSaved=d}
+  if(d>(M.dmgBest||0)){M.dmgBest=d;S.dmgRec=1}else S.dmgRec=0;saveMeta()}}catch(e){console.warn(e)}return r}}

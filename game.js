@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="1.2";
+const VER="1.3";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -186,7 +186,7 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
  const big=x.total>=G.target*.5;if(big){shake();bgKick(.8)}
  SFX.score();bigPop(x.total.toLocaleString(),"score");foeHit(x.total);await countScore(x.total);
  G.lastX=x;G.streak=x.streak;G.lastType=x.type;if(x.beat)G.beatsThis=(G.beatsThis||0)+1;
- {const S=G.stats;S.hands++;S.best=Math.max(S.best,x.total);S.types[x.type]=(S.types[x.type]||0)+1;if(x.beat)S.beats++}
+ {const S=G.stats;S.hands++;S.best=Math.max(S.best,x.total);S.dmg=(S.dmg||0)+x.total;S.types[x.type]=(S.types[x.type]||0)+1;if(x.beat)S.beats++}
  if(B&&B.snowT&&x.beat)G.snow++;
  for(const c of order){if(c.en==="glass"&&c.seal!=="guard"&&rnd()<.25&&!x.destroy.includes(c)){x.destroy.push(c);G.glassBroken=(G.glassBroken||0)+1;toast("玻璃牌碎了")}}
  if(x.destroy.length){const ds=new Set(x.destroy);G.deck=G.deck.filter(c=>!ds.has(c));$$("#table .card").forEach((e,i)=>{if(ds.has(order[i]))e.classList.add("boom")});SFX.bad();bgKick(.6);toast(`${x.destroy.length} 张牌被移出了牌组（还剩 ${G.deck.length} 张）`);await sleep(500)}
@@ -241,7 +241,7 @@ async function blindWin(){const x0={};await foeKO();SFX.win();bgKick(1);const B=
  ov(`<div class="box"><h2>${B.n} · 过了</h2><div class="wRows"><p><span>过关</span><b>+${B.gold}</b></p>${left?`<p><span>剩下 ${left} 次出牌</span><b>+${left}</b></p>`:""}${gl?`<p><span>手里的金卡</span><b>+${gl}</b></p>`:""}${extra?`<p><span>伙伴</span><b>+${extra}</b></p>`:""}${interest?`<p><span>利息（每 5 金币 +1，最多 3）</span><b>+${interest}</b></p>`:""}</div><div class="wTot">金币 +${tot}</div><button class="btn gold" id="wGo">去商店</button></div>`);
  $("#wGo").onclick=()=>{closeOv();G.gold+=tot;SFX.coins();G.blind++;if(G.blind>2){G.blind=0;G.lvIdx++;if(G.lvIdx>=LV_LIST.length){if(G.endless)return endlessNext();G.lvIdx=LV_LIST.length-1;G.won=1;return runWin()}}G.reroll=5;G.target=targetOf(G.lvIdx,G.blind);G.boss=G.blind===2?bossOf(G.lvIdx):null;shopOpen()}}
 function statsHTML(){const S=G.stats;const top=Object.entries(S.types).sort((a,b)=>b[1]-a[1])[0];
- return`<div class="stG"><div><small>走到</small><b>第 ${G.lvIdx+1} 站</b><em>${locOf(G.lvIdx).n}</em></div><div><small>最大一手</small><b>${S.best.toLocaleString()}</b></div><div><small>一共出了</small><b>${S.hands} 手</b><em>压住 ${S.beats} 次</em></div><div><small>最常出</small><b>${top?HANDS[top[0]].n:"—"}</b></div></div>
+ return`<div class="stG"><div><small>走到</small><b>第 ${G.lvIdx+1} 站</b><em>${locOf(G.lvIdx).n}</em></div><div><small>总伤害</small><b>${(S.dmg||0).toLocaleString()}</b>${dmgNote()}</div><div><small>最大一手</small><b>${S.best.toLocaleString()}</b></div><div><small>一共出了</small><b>${S.hands} 手</b><em>压住 ${S.beats} 次</em></div><div><small>最常出</small><b>${top?HANDS[top[0]].n:"—"}</b></div></div>
  ${G.partners.length?`<div class="stP">${G.partners.map(id=>`<img src="${IMG(PARTNERS[id].img)}" title="${PARTNERS[id].n}">`).join("")}</div>`:""}`}
 function gameOver(){SFX.bad();runEnd(false);ov(`<div class="box lose endBox"><h2>被 ${G.foe.n} 打败了</h2><p class="msg">在 <b>${locOf(G.lvIdx).n} · 打 ${rankName(LV_LIST[G.lvIdx])}</b> 的${BLINDS[G.blind].n}<br>它还剩 ${(G.target-G.score).toLocaleString()} 血</p>${statsHTML()}<button class="btn" id="goAgain">再来一局</button><button class="btn dark" id="goHome">回主页</button></div>`);$("#goAgain").onclick=()=>{closeOv();newRun()};$("#goHome").onclick=()=>{closeOv();titleScreen()}}
 async function runWin(){runEnd(true);SFX.win();

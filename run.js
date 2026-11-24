@@ -83,7 +83,7 @@ async function shareImage(win){const W=720,H=1080,cv=document.createElement("can
  x.fillStyle="#fff6e0";x.font=`28px ${F}`;x.fillText(`${hero.n} · 难度 ${G.diff||0} · ${locOf(G.lvIdx).n}`,W/2,566);
  const box=(bx,by,lab,val)=>{x.fillStyle="rgba(255,255,255,.07)";x.beginPath();x.roundRect?x.roundRect(bx,by,300,120,16):x.rect(bx,by,300,120);x.fill();x.fillStyle="#cdbba0";x.font=`24px ${F}`;x.fillText(lab,bx+150,by+40);x.fillStyle="#ffd76a";x.font=`bold 46px ${F}`;x.fillText(val,bx+150,by+96)};
  const top=Object.entries(S.types||{}).sort((a,b)=>b[1]-a[1])[0];
- box(50,610,"最痛一手",(S.best||0).toLocaleString());box(370,610,"最常出",top?HANDS[top[0]].n:"—");box(50,750,"一共出了",`${S.hands||0} 手`);box(370,750,"压住对手",`${S.beats||0} 次`);
+ box(50,610,"总伤害",(S.dmg||0).toLocaleString());box(370,610,"最痛一手",(S.best||0).toLocaleString());box(50,750,"一共出了",`${S.hands||0} 手`);box(370,750,"压住对手",`${S.beats||0} 次`);
  const ps=G.partners.slice(0,6);x.fillStyle="#cdbba0";x.font=`24px ${F}`;x.fillText("这一局的伙伴",W/2,912);
  const sz=96,gap=12,x0=W/2-(ps.length*sz+(ps.length-1)*gap)/2;for(let i=0;i<ps.length;i++){const im=await loadImg(IMG(PARTNERS[ps[i]].img));if(im){const s=Math.min(sz/im.width,sz/im.height);x.drawImage(im,x0+i*(sz+gap)+(sz-im.width*s)/2,930+(sz-im.height*s)/2,im.width*s,im.height*s)}}
  x.fillStyle="#8a7a66";x.font=`22px ${F}`;x.fillText("B站搜索「奶蛙牌」 · 奶蛙工作室",W/2,H-30);
