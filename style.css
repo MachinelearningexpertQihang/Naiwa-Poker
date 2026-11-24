@@ -828,3 +828,5 @@ body.lite *{-webkit-backdrop-filter:none!important;backdrop-filter:none!importan
 .bathC{width:62px;height:87px;position:relative;cursor:pointer}
 .bathC .card{position:absolute;left:0;top:0;transform:scale(.646);transform-origin:0 0;margin:0}
 .bathC:hover{outline:3px solid var(--gold);border-radius:8px}
+.bigPop.upg{font-size:46px;top:218px;color:#dff4ff;text-shadow:3px 3px 0 #2a5a9a,6px 6px 0 rgba(0,0,0,.55)}
+.bigPop.upg.rb{color:#fff;text-shadow:3px 3px 0 #c43fa0,6px 6px 0 rgba(0,0,0,.55)}

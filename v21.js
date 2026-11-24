@@ -20,10 +20,11 @@ async function cardXP(c,el,x,n){if(!G||!c||c.s===undefined||c.ed==="poly")return
  if(c.xp>=b){c.ed="poly";up="poly"}else if(c.xp>=a&&!c.ed){c.ed="foil";up="foil"}
  xpPaint(el,c);
  if(up){G.ups=(G.ups||0)+1;if(up==="poly")G.rainbows=(G.rainbows||0)+1;
-  if(el){el.classList.remove("ed-foil","ed-gold","lvUp");void el.offsetWidth;el.classList.add("ed-"+up,"lvUp");popOn(el,up==="poly"?"变成彩虹牌了！":"升级：闪光牌","xm")}
+  if(el){el.classList.remove("ed-foil","ed-gold","lvUp");void el.offsetWidth;el.classList.add("ed-"+up,"lvUp");popOn(el,up==="poly"?"彩虹！":"闪光！","xm")}
+  if(el){bigPop(up==="poly"?"这张牌长成彩虹牌了！":"这张牌开始发光了！","upg"+(up==="poly"?" rb":""));try{bgKick(.4)}catch(e){}}
   try{SFX.shine()}catch(e){}
   if(up==="poly"&&G.partners.includes("u_by")){G.gold+=4;try{partnerPulse("u_by","+4 金币");renderSide2()}catch(e){}}
-  if(el)await sleep(380)}
+  if(el)await sleep(700)}
  return up}
 // 牌面右下角一圈小进度
 {const _c=cardHTML;cardHTML=function(c,opt={}){let h=_c(c,opt);try{if(c&&!(c.hid&&opt.inHand)&&c.s!==undefined){const f=xpFrac(c);if(f>=0)h=h.replace('<i class="cFoil">',`<i class="cXp ${c.ed==="foil"||c.ed==="gold"?"t2":""}" style="--p:${f.toFixed(3)}"></i><i class="cFoil">`)}}catch(e){}return h}}
@@ -48,7 +49,7 @@ Object.assign(PARTNERS,{
 SETS_OFF["升级"]={d:"彩虹牌的 ×1.5 变成 ×2"};
 
 /* ---------- 4. 商店：奶蛙澡堂（花钱把一张牌泡升一档） ---------- */
-{const _o=shopOpen;shopOpen=function(){const r=_o.apply(this,arguments);try{const its=G.shop.items;let j=-1;its.forEach((it,i)=>{if(/pack/.test(it.k))j=i});
+{const _o=shopOpen;shopOpen=async function(){const r=await _o.apply(this,arguments);try{if(!G||!G.shop)return r;const its=G.shop.items;let j=-1;its.forEach((it,i)=>{if(/pack/.test(it.k))j=i});
  if(j>=0&&!its.some(it=>it.k==="bath")){its[j]={k:"bath",p:4+Math.floor(G.lvIdx/4)};shopRender()}}catch(e){console.warn(e)}return r}}
 {const _r=shopRender;shopRender=function(){const r=_r.apply(this,arguments);try{const row=$("#shop .shRow");if(row)G.shop.items.forEach((it,i)=>{if(it.k!=="bath"||it.sold)return;const el=row.children[i];if(!el)return;
  el.className="shItem bath";el.innerHTML=`<span class="kind">澡堂</span><div class="bathArt"><i></i><i></i><i></i><b></b></div><b>奶蛙澡堂</b><p>挑 1 张牌泡一泡<br>直接长一档：普通 → 闪光 → 彩虹</p><div class="price">${packP(it)}</div>`})}catch(e){console.warn(e)}return r}}
