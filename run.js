@@ -100,7 +100,7 @@ const HELP_P=["c7","sn","sna","msy","snb","dg","msb"];
   if(it&&pool.length&&!HELP_P.includes(it.id)){it.id=pick(pool);it.sold=0;shopRender()}}}catch(e){console.warn(e)}return r}}
 
 /* ---------- 6. 伙伴流派套装：同一个流派凑齐 3 个，套装生效 ---------- */
-/* 1.6：套装先去掉（流派保留）。原来的套装效果留在 SETS_OFF 里，想恢复把下面一行改回 SETS=SETS_OFF 就行 */
+/* 1.7：套装回来了，但做得低调：不写 x/3，凑齐的伙伴边缘一起泛淡淡的金光，卡槽里三个一起移动 */
 const SETS_OFF={
  "炸弹":{d:"炸弹按多一张算（四炸当五炸，五炸当六炸……）"},
  "连牌":{d:"顺子、三连对、钢板、同花顺 倍率 ×1.5"},
@@ -118,7 +118,7 @@ const SETS_OFF={
  "成长":{d:"这一局每出过 5 手，倍率 +1"},
  "弃牌":{d:"这一关每弃过一次牌，倍率 +4"},
  "小牌":{d:"打出的牌全是 2～6：倍率 ×2"}};
-const SETS={};
+const SETS=SETS_OFF;
 function setCounts(G){const n={};(G.partners||[]).forEach(id=>{const t=PARTNERS[id]&&PARTNERS[id].t;if(t)n[t]=(n[t]||0)+1});return n}
 const setOn=(G,t)=>!!SETS[t]&&(setCounts(G)[t]||0)>=3;
 function extraHand(x,G){const out=[];const lv=x.lv,cs=x.cards||[];
@@ -147,13 +147,13 @@ function extraHand(x,G){const out=[];const lv=x.lv,cs=x.cards||[];
 {const _ds=discardSel;discardSel=async function(){const n0=G?G.discLeft:0;const r=await _ds.apply(this,arguments);try{if(G&&G.discLeft<n0)G.discUsed=(G.discUsed||0)+1}catch(e){}return r}}
 // 套装栏：伙伴旁边显示每个流派凑了几个
 function renderSetBar(){let el=$("#setBar");if(!G||!$("#play.on, #shop.on")){if(el)el.style.display="none";return}const sd=$("#side");if(!el){el=document.createElement("div");el.id="setBar"}if(sd&&el.parentNode!==sd)sd.appendChild(el);el.style.display="";const inShop=!!$("#shop.on");
- const n=setCounts(G);const ks=Object.keys(n).filter(t=>SETS[t]).sort((a,b)=>n[b]-n[a]);
+ const n=setCounts(G);const ks=[];
  el.innerHTML=(ks.length?ks.slice(0,4).map(t=>`<button class="sb ${n[t]>=3?"on":""}" data-t="${t}"><b>${t}</b><i>${Math.min(3,n[t])}/3</i></button>`).join(""):"")+(G.bombsN?`<span class="sbBomb">炸弹 ×${G.bombsN}</span>`:"");
  el.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{SFX.click();toast(`<b>${b.dataset.t}套装</b>（${Math.min(3,n[b.dataset.t])}/3）：${SETS[b.dataset.t].d}`)})}
 {const _rp=renderPartners;renderPartners=function(){const r=_rp.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
 {const _sh=show;show=function(id){const r=_sh.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
 // 伙伴卡的说明里写上「X 流 · 套装：…」
-{const _pt=partnerTip;partnerTip=function(i,el){_pt.apply(this,arguments);try{const tp=$("#tip"),id=G.partners[i],t=PARTNERS[id].t;if(tp&&SETS[t]){const n=setCounts(G)[t]||0;tp.insertAdjacentHTML("beforeend",`<p class="tipSet ${n>=3?"on":""}">${t}套装 ${Math.min(3,n)}/3：${SETS[t].d}</p>`)}}catch(e){}}}
+{const _pt=partnerTip;partnerTip=function(i,el){_pt.apply(this,arguments);try{const tp=$("#tip"),id=G.partners[i],t=PARTNERS[id].t;if(tp&&SETS[t]&&setOn(G,t)){tp.insertAdjacentHTML("beforeend",`<p class="tipSet on">${t}流凑齐了：${SETS[t].d}</p>`)}}catch(e){}}}
 
 /* ---------- 7. 每日挑战：每天一样的种子、一样的开局和一条特殊规则，单独一个日榜 ---------- */
 const DAILY_RULES=[
@@ -198,8 +198,8 @@ async function dailyScreen(){SFX.click();const k=dailyKey(),R=dailyRule(k),day=d
 // 左边栏重画后，把套装栏放回最下面
 {const _rs=renderSide;renderSide=function(){const r=_rs.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
 // 商店里的伙伴：标出买下以后这个流派凑到几个
-function ptSetTag(id){const P=PARTNERS[id];if(!SETS[P.t])return`${P.t}流`;const n=setCounts(G)[P.t]||0;if(n>=3)return`${P.t}流 · 套装已激活`;return n+1>=3?`${P.t}流 ${n+1}/3 · 买下激活套装`:`${P.t}流 ${n+1}/3`}
-{const _sr=shopRender;shopRender=function(){const r=_sr.apply(this,arguments);try{(G.shop.items||[]).forEach((it,i)=>{if(it.k!=="partner")return;const t=document.querySelector(`#shop .shItem.pt[data-i="${i}"] .ptTag`);if(!t)return;const n=(setCounts(G)[PARTNERS[it.id].t]||0);t.textContent=ptSetTag(it.id);t.classList.toggle("go",!!SETS[PARTNERS[it.id].t]&&n===2)})}catch(e){console.warn(e)}return r}}
+function ptSetTag(id){return`${PARTNERS[id].t}流`}
+{const _sr=shopRender;shopRender=function(){const r=_sr.apply(this,arguments);try{(G.shop.items||[]).forEach((it,i)=>{if(it.k!=="partner")return;const t=document.querySelector(`#shop .shItem.pt[data-i="${i}"] .ptTag`);if(!t)return;const n=(setCounts(G)[PARTNERS[it.id].t]||0);t.textContent=ptSetTag(it.id);t.classList.remove("go")})}catch(e){console.warn(e)}return r}}
 
 /* ===================== 1.6：商店买东西先确认 =====================
    点商店里的东西，先弹出一张确认卡（写着是什么、多少钱、买完剩多少），点「买下」才真的买 */
@@ -217,3 +217,10 @@ function shopAsk(i){const it=G.shop.items[i];if(!it||it.sold||G.busy)return;SFX.
  $("#askNo").onclick=()=>{SFX.click();closeOv()};
  $("#askYes").onclick=()=>{if(poor||full)return;closeOv();shopBuy(i)}}
 {const _sr2=shopRender;shopRender=function(){const r=_sr2.apply(this,arguments);try{$$("#shop .shItem[data-i]").forEach(e=>e.onclick=()=>shopAsk(+e.dataset.i))}catch(e){}return r}}
+
+/* 1.7：凑齐的同流派伙伴在卡槽里挨在一起，一起泛金光，拖动时一起走 */
+function setGroupOrder(){if(!G||!G.partners)return;const on=new Set(Object.keys(setCounts(G)).filter(t=>setOn(G,t)));if(!on.size)return;const seen=new Set(),out=[];
+ G.partners.forEach(id=>{const t=PARTNERS[id]&&PARTNERS[id].t;if(on.has(t)){if(seen.has(t))return;seen.add(t);G.partners.forEach(j=>{if(PARTNERS[j]&&PARTNERS[j].t===t)out.push(j)})}else out.push(id)});
+ if(out.join()!==G.partners.join())G.partners.splice(0,G.partners.length,...out)}
+{const _rp3=renderPartners;renderPartners=function(){try{setGroupOrder()}catch(e){}const r=_rp3.apply(this,arguments);try{const on=new Set(Object.keys(setCounts(G)).filter(t=>setOn(G,t)));
+ $$("#partners .pCard").forEach((e,i)=>{const id=G.partners[+e.dataset.i];const t=id&&PARTNERS[id]&&PARTNERS[id].t;e.classList.toggle("setOn",!!t&&on.has(t));if(t)e.dataset.t=t})}catch(e){}return r}}

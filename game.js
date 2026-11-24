@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="1.6";
+const VER="1.7";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -19,7 +19,7 @@ function fit(){const vv=window.visualViewport;let W=innerWidth,H=innerHeight,ox=
  const st=$("#stage");if(!st)return;const port=H>W*1.05;let sf={t:0,r:0,b:0,l:0};try{sf=safeIn()}catch(e){}
  const aw=Math.max(100,W-sf.l-sf.r),ah=Math.max(100,H-sf.t-sf.b);st.style.left=(ox+sf.l+aw/2)+"px";st.style.top=(oy+sf.t+ah/2)+"px";
  const s=port?Math.min(aw/720,ah/1280):Math.min(aw/1280,ah/720);st.style.transform=port?`translate(-50%,-50%) rotate(90deg) scale(${s})`:`translate(-50%,-50%) scale(${s})`;
- {const xw=Math.max(0,((port?ah:aw)/s-1280)/2),yh=Math.max(0,((port?aw:ah)/s-720)/2);st.style.setProperty("--xw",xw.toFixed(1)+"px");st.style.setProperty("--yh",yh.toFixed(1)+"px")}document.body.classList.toggle("port",port);fit._k=innerWidth+"x"+innerHeight+(vv?"|"+vv.width+"x"+vv.height:"")}
+ document.body.classList.toggle("port",port);fit._k=innerWidth+"x"+innerHeight+(vv?"|"+vv.width+"x"+vv.height:"")}
 function fitSoon(){[60,250,600,1200,2500].forEach(t=>setTimeout(fit,t))}
 setInterval(()=>{const vv=window.visualViewport;if(fit._k!==innerWidth+"x"+innerHeight+(vv?"|"+vv.width+"x"+vv.height:""))fit()},700);
 if(window.visualViewport)visualViewport.addEventListener("resize",fit);addEventListener("orientationchange",fitSoon);

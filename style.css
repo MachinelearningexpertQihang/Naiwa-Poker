@@ -773,7 +773,15 @@ body.port{background:#0a0508}
 /* 商店：流派标签挪到牌下面，不挡「商店」两个字 */
 .shItem .ptTag{position:static!important;transform:none!important;display:inline-block;margin:8px 0 0;top:auto!important}
 #shop .shItem{height:292px}
-/* 1.6：屏幕比 16:9 宽（或高）时，背景铺满两边，不留黑边；牌桌本身还在正中间 */
-#stage{overflow:visible;clip-path:inset(calc(-1*var(--yh,0px)) calc(-1*var(--xw,0px)))}
-#bgimg,#bgfx,#crt,#ov{left:calc(-1*var(--xw,0px))!important;right:calc(-1*var(--xw,0px))!important;top:calc(-1*var(--yh,0px))!important;bottom:calc(-1*var(--yh,0px))!important;width:auto!important;height:auto!important}
-#bgfx{width:calc(100% + 2*var(--xw,0px))!important;height:calc(100% + 2*var(--yh,0px))!important}
+/* 1.7：凑齐的同流派伙伴，边缘一起泛淡淡的金光（同一个节奏） */
+.pCard.setOn::before{content:"";position:absolute;inset:-3px;border-radius:12px;pointer-events:none;z-index:-1;box-shadow:0 0 0 2px rgba(255,214,120,.55),0 0 14px 3px rgba(255,200,80,.35);animation:setGlow 2.8s ease-in-out infinite;animation-delay:0s}
+@keyframes setGlow{0%,100%{opacity:.45}50%{opacity:1}}
+.card{-webkit-touch-callout:none}
+.dropR{box-shadow:6px 0 0 #ffd84a,0 0 18px rgba(255,216,74,.55)!important}
+/* 1.7：长按扑克牌的说明 */
+#tip.ciTip{width:280px}
+.cardInfo .ciN{display:inline-block;font-size:20px;margin-right:8px}.cardInfo .ciC{font-size:12px;opacity:.65}
+.cardInfo p{margin:4px 0 0;font-size:14px;line-height:1.5}
+.cardInfo .ciTag{display:inline-block;margin:10px 0 0;padding:1px 8px 2px;border-radius:4px;font-size:13px;color:#fff;background:#6b5a4a}
+.cardInfo .ciTag.trib{background:#b0352a}.cardInfo .ciTag.wild{background:#c8455a}.cardInfo .ciTag.lv{background:#b8860b}
+.cardInfo .ciTag.en{background:#3a6ea8}.cardInfo .ciTag.ed{background:#8a5ac8}.cardInfo .ciTag.seal{background:#2f8a5a}.cardInfo .ciTag.bad{background:#555}
