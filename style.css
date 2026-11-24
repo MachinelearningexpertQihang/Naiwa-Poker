@@ -675,3 +675,38 @@ button{font-family:var(--px);cursor:pointer;border:0}
 .fu.tal:not(.t-suit) .fuIn{box-shadow:inset 0 0 0 2px rgba(255,255,255,.28),0 5px 0 rgba(0,0,0,.45)!important}
 .fu.tal.t-suit .fuIn{box-shadow:inset 0 0 0 2px rgba(0,0,0,.12),0 5px 0 rgba(0,0,0,.45)!important}
 .fu.tal .fuIn::after,.fu.mb .fuIn::after{display:none!important}
+/* ---------- 1.0：跳过小关 ---------- */
+.skipBox{margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%}
+.skipTag{display:flex;flex-direction:column;align-items:center;background:var(--tc);color:#fff;border-radius:8px;padding:5px 10px 6px;width:88%;box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.skipTag b{font-size:16px}.skipTag small{font-size:11px;opacity:.9;line-height:1.3;text-align:center}
+#bsSkip{font-size:14px;padding:6px 12px}
+/* ---------- 1.0：站间小事件 ---------- */
+.evBox{width:720px;text-align:left}
+.evHead{display:flex;gap:18px;align-items:center;margin-bottom:18px}
+.evHead img{width:120px;height:120px;object-fit:contain;flex:none;filter:drop-shadow(0 6px 0 rgba(0,0,0,.35))}
+.evHead small{font-size:14px;color:var(--gold);letter-spacing:1px}
+.evHead h2{margin:4px 0 8px;text-align:left}
+.evHead p{margin:0;font-size:19px;line-height:1.55;color:#fff6e0}
+.evOpts{display:flex;flex-direction:column;gap:10px}
+.evOpt{display:flex;flex-direction:column;align-items:flex-start;gap:3px;background:var(--ink2);border:0;border-radius:10px;padding:12px 16px;cursor:pointer;font-family:inherit;color:#fff6e0;box-shadow:inset 0 0 0 2px #5a4a3a;text-align:left;transition:transform .12s}
+.evOpt:hover{transform:translateX(6px);box-shadow:inset 0 0 0 2px var(--gold)}
+.evOpt b{font-size:20px}.evOpt small{font-size:14px;color:#cdbba0}
+.evOpt.off{opacity:.4;cursor:not-allowed}
+.evBox #evGo{display:block;margin:6px auto 0}
+/* ---------- 1.0：商店永久升级 ---------- */
+.shItem.vch{position:relative}
+.vchArt{width:96px;height:96px;margin:6px auto 8px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#ffe28a,#d99a1e 70%);box-shadow:inset 0 0 0 4px #fff6e0,0 0 0 3px #8a5a10,0 6px 0 rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center}
+.vchArt i{font-style:normal;font-size:44px;color:#6a3a00}
+.shItem.vch em{font-style:normal;color:var(--gold);font-size:12px}
+.saleTag{position:absolute;top:-14px;left:16px;background:#2e6fb3;color:#fff;font-size:14px;padding:3px 10px;border-radius:6px;z-index:3}
+.shRow{position:relative}
+/* ---------- 1.0：分享图 ---------- */
+#shareOv{position:absolute;inset:0;z-index:200;background:rgba(10,6,8,.86);display:flex;align-items:center;justify-content:center}
+#shareOv .shBox{display:flex;flex-direction:column;align-items:center;gap:10px}
+#shareOv img{height:600px;width:auto;border-radius:12px;box-shadow:0 0 0 3px var(--gold),0 10px 30px rgba(0,0,0,.6)}
+#shareOv p{margin:0;color:#fff6e0;font-size:18px}
+.bsCard{position:relative}
+.skipTag{position:absolute;top:-16px;right:-14px;width:auto;max-width:150px;padding:5px 10px 6px;transform:rotate(4deg);z-index:3;align-items:flex-start}
+.skipTag small{font-size:10px;opacity:.85}.skipTag b{font-size:15px;line-height:1.2}.skipTag em{font-style:normal;font-size:10px;line-height:1.3;opacity:.95}
+.bsBtns{display:flex;gap:10px;justify-content:center;align-items:center}
+#bsSkip{font-size:18px;padding:8px 16px}

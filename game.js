@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="0.5";
+const VER="1.0";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -211,8 +211,8 @@ function shake(){if(typeof SET!=="undefined"&&!SET.shake)return;const s=$("#stag
 
 /* ---------- 过关 / 输了 ---------- */
 async function blindWin(){const x0={};await foeKO();SFX.win();bgKick(1);const B=BLINDS[G.blind];const left=G.handsLeft;const gl=G.hand.filter(c=>c.ed==="gold").length*3;let extra=0;for(const id of G.partners){const P=PARTNERS[id];if(P.end){x0.self=G.pst[id]=(G.pst[id]||{});extra+=P.end(G,x0)||0}}
- const interest=Math.min(G.partners.includes("egq")?10:(G.diff||0)>=5?3:5,Math.floor(G.gold/(G.partners.includes("egy")?4:5)));const tot=B.gold+left+gl+extra+interest;
- ov(`<div class="box"><h2>${B.n} · 过了</h2><div class="wRows"><p><span>过关</span><b>+${B.gold}</b></p>${left?`<p><span>剩下 ${left} 次出牌</span><b>+${left}</b></p>`:""}${gl?`<p><span>手里的金卡</span><b>+${gl}</b></p>`:""}${extra?`<p><span>伙伴</span><b>+${extra}</b></p>`:""}${interest?`<p><span>利息（每 5 金币 +1，最多 5）</span><b>+${interest}</b></p>`:""}</div><div class="wTot">金币 +${tot}</div><button class="btn gold" id="wGo">去商店</button></div>`);
+ const interest=Math.min(G.partners.includes("egq")?6:(G.diff||0)>=5?2:3,Math.floor(G.gold/(G.partners.includes("egy")?4:5)));const tot=B.gold+left+gl+extra+interest;
+ ov(`<div class="box"><h2>${B.n} · 过了</h2><div class="wRows"><p><span>过关</span><b>+${B.gold}</b></p>${left?`<p><span>剩下 ${left} 次出牌</span><b>+${left}</b></p>`:""}${gl?`<p><span>手里的金卡</span><b>+${gl}</b></p>`:""}${extra?`<p><span>伙伴</span><b>+${extra}</b></p>`:""}${interest?`<p><span>利息（每 5 金币 +1，最多 3）</span><b>+${interest}</b></p>`:""}</div><div class="wTot">金币 +${tot}</div><button class="btn gold" id="wGo">去商店</button></div>`);
  $("#wGo").onclick=()=>{closeOv();G.gold+=tot;SFX.coins();G.blind++;if(G.blind>2){G.blind=0;G.lvIdx++;if(G.lvIdx>=LV_LIST.length){if(G.endless)return endlessNext();G.lvIdx=LV_LIST.length-1;G.won=1;return runWin()}}G.reroll=5;G.target=targetOf(G.lvIdx,G.blind);G.boss=G.blind===2?bossOf(G.lvIdx):null;shopOpen()}}
 function statsHTML(){const S=G.stats;const top=Object.entries(S.types).sort((a,b)=>b[1]-a[1])[0];
  return`<div class="stG"><div><small>走到</small><b>第 ${G.lvIdx+1} 站</b><em>${locOf(G.lvIdx).n}</em></div><div><small>最大一手</small><b>${S.best.toLocaleString()}</b></div><div><small>一共出了</small><b>${S.hands} 手</b><em>压住 ${S.beats} 次</em></div><div><small>最常出</small><b>${top?HANDS[top[0]].n:"—"}</b></div></div>
