@@ -750,7 +750,7 @@ body.port{background:#0a0508}
 .sdScore .runDmg{flex-basis:100%;text-align:right;font-size:13px;opacity:.85;line-height:1}
 .sdScore .runDmg b{color:var(--gold);font-size:15px;margin-left:4px}
 /* 左边栏：从上铺到下；套装栏在最下面 */
-#side{display:flex!important;flex-direction:column;justify-content:space-between;gap:8px}
+#side[style*="block"]{display:flex!important}#side{flex-direction:column;justify-content:space-between;gap:8px}
 #setBar{position:static!important;width:auto!important;margin-top:auto}
 #setBar:empty{display:none!important}
 .shItem .ptTag.go{background:linear-gradient(#ffe68a,#ff9f2e);box-shadow:0 0 10px rgba(255,190,60,.8);font-weight:700}
@@ -760,3 +760,5 @@ body.port{background:#0a0508}
 .eRwO{flex:1;background:var(--ink2,#2a1d22);border:2px solid #6b5338;border-radius:12px;padding:18px 10px;color:#fff6e0;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:transform .12s,border-color .12s}
 .eRwO:hover{transform:translateY(-4px);border-color:#ffd76a}.eRwO b{font-size:20px;color:#ffd76a}.eRwO small{font-size:13px;opacity:.8;line-height:1.4}
 .eGoal{font-size:13px;margin-top:4px;opacity:.9}.eGoal b{color:#ffd76a}
+.cloudSt{font-size:13px;opacity:.75;margin:10px 0 6px}
+.cmpT{margin:10px auto;border-spacing:18px 6px;font-size:16px}.cmpT td:first-child{opacity:.7}
