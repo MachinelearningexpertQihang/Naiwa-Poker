@@ -198,3 +198,20 @@ async function dailyScreen(){SFX.click();const k=dailyKey(),R=dailyRule(k),day=d
 // 商店里的伙伴：标出买下以后这个流派凑到几个
 function ptSetTag(id){const P=PARTNERS[id];if(!SETS[P.t])return`${P.t}流`;const n=setCounts(G)[P.t]||0;if(n>=3)return`${P.t}流 · 套装已激活`;return n+1>=3?`${P.t}流 ${n+1}/3 · 买下激活套装`:`${P.t}流 ${n+1}/3`}
 {const _sr=shopRender;shopRender=function(){const r=_sr.apply(this,arguments);try{(G.shop.items||[]).forEach((it,i)=>{if(it.k!=="partner")return;const t=document.querySelector(`#shop .shItem.pt[data-i="${i}"] .ptTag`);if(!t)return;const n=(setCounts(G)[PARTNERS[it.id].t]||0);t.textContent=ptSetTag(it.id);t.classList.toggle("go",!!SETS[PARTNERS[it.id].t]&&n===2)})}catch(e){console.warn(e)}return r}}
+
+/* ===================== 1.6：商店买东西先确认 =====================
+   点商店里的东西，先弹出一张确认卡（写着是什么、多少钱、买完剩多少），点「买下」才真的买 */
+function shopAsk(i){const it=G.shop.items[i];if(!it||it.sold||G.busy)return;SFX.click();
+ const pt=it.k==="partner",price=pt?ptP(it.id):packP(it),el=document.querySelector(`#shop .shItem[data-i="${i}"]`);
+ const name=pt?PARTNERS[it.id].n:el?(el.querySelector("b")||{}).textContent||"这个":"这个";
+ const full=pt&&G.partners.length>=(G.pmax||5),poor=G.gold<price;
+ const look=el?el.cloneNode(true):null;if(look){look.removeAttribute("data-i");look.classList.add("askLook")}
+ ov(`<div class="box askBox"><h2>买下${pt?"伙伴":""}「${name}」？</h2><div class="askRow"><div class="askPic" id="askPic"></div><div class="askTxt">
+  ${pt?`<p class="askD">${partnerDesc?partnerDesc(it.id):PARTNERS[it.id].d}</p><p class="askT">${ptSetTag(it.id)}</p>`:""}
+  <p class="askP">价格 <b>${price}</b> 金币　·　你有 <b>${G.gold}</b>${poor?"":`　·　买完剩 <b>${G.gold-price}</b>`}</p>
+  ${poor?`<p class="askW">金币不够</p>`:full?`<p class="askW">伙伴栏满了（${G.partners.length}/${G.pmax||5}），先卖掉一个伙伴才能买</p>`:""}</div></div>
+  <div class="askBtns"><button class="btn ${poor||full?"dark":"gold"}" id="askYes" ${poor||full?"disabled":""}>买下 · ${price} 金币</button><button class="btn dark" id="askNo">算了</button></div></div>`);
+ if(look)$("#askPic").appendChild(look);
+ $("#askNo").onclick=()=>{SFX.click();closeOv()};
+ $("#askYes").onclick=()=>{if(poor||full)return;closeOv();shopBuy(i)}}
+{const _sr2=shopRender;shopRender=function(){const r=_sr2.apply(this,arguments);try{$$("#shop .shItem[data-i]").forEach(e=>e.onclick=()=>shopAsk(+e.dataset.i))}catch(e){}return r}}
