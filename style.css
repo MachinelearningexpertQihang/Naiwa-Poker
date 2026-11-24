@@ -786,3 +786,20 @@ body.port{background:#0a0508}
 .cardInfo .ciTag.trib{background:#b0352a}.cardInfo .ciTag.wild{background:#c8455a}.cardInfo .ciTag.lv{background:#b8860b}
 .cardInfo .ciTag.en{background:#3a6ea8}.cardInfo .ciTag.ed{background:#8a5ac8}.cardInfo .ciTag.seal{background:#2f8a5a}.cardInfo .ciTag.bad{background:#555}
 #shRe small.reHint{display:block;font-size:11px;opacity:.85;margin-top:2px;line-height:1}
+/* ===== 1.8 符咒牌面细节 ===== */
+.fu .fuIn{--dl:rgba(255,255,255,.38);--dt:rgba(255,255,255,.06)}
+.fu.tal.t-suit .fuIn{--dl:rgba(90,60,30,.28);--dt:rgba(90,60,30,.05)}
+.fu.mb .fuIn{--dl:rgba(242,200,98,.45);--dt:rgba(242,200,98,.05)}
+.fuDeco{position:absolute;inset:0;pointer-events:none;z-index:0;
+ background:
+  radial-gradient(circle at 50% 42%,transparent 0 29%,var(--dl) 29.5% 30.5%,transparent 31% 35%,var(--dt) 35% 36%,transparent 36.5%),
+  repeating-linear-gradient(135deg,var(--dt) 0 2px,transparent 2px 7px)}
+.fuDeco::before{content:"";position:absolute;inset:6px;border:1px solid var(--dl);border-radius:5px}
+.fuDeco::after{content:"";position:absolute;left:50%;top:2px;width:7px;height:7px;transform:translateX(-50%) rotate(45deg);background:var(--dl);box-shadow:0 0 0 2px var(--fc,#c23b2e)}
+.fu.tal .fuIn>.talG{position:relative;z-index:1}.fu.mb .mbRing,.fu.mb .mbG{z-index:1}
+.fu.tal .fuIn b,.fu.mb .fuIn b{bottom:12px!important;margin:0!important;z-index:1}.fu.big.tal .fuIn b,.fu.big.mb .fuIn b{bottom:17px!important;font-size:20px!important}
+.fu.tal .talG{margin-bottom:18px!important}.fu.big.tal .talG{margin-bottom:26px!important}
+.fu.big .fuDeco::before{inset:8px;border-radius:7px}
+.fu.big .fuDeco::after{top:3px;width:9px;height:9px}
+.fu.mb .fuDeco{background:
+  radial-gradient(1.5px 1.5px at 18% 22%,var(--dl),transparent),radial-gradient(1px 1px at 78% 16%,var(--dl),transparent),radial-gradient(1.5px 1.5px at 84% 64%,var(--dl),transparent),radial-gradient(1px 1px at 14% 70%,var(--dl),transparent),radial-gradient(1px 1px at 60% 86%,var(--dl),transparent)}

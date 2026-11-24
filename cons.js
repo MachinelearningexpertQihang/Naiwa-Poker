@@ -150,3 +150,6 @@ function openFuPack(it){return new Promise(res=>{const mb=it.k==="mbpack";const 
 // 记住最近出的牌型（茶道符用）
 {const _p=playSel;playSel=async function(){const r=await _p.apply(this,arguments);if(G&&G.lastType)G.lastTea=G.lastType;return r}}
 addEventListener("load",()=>{consInit();$("#bPlay").onclick=()=>playSel();$("#bDisc").onclick=()=>discardSel()});
+
+/* 1.8：符咒牌面多一点细节：内框线、上下两颗小菱形、图案后面的淡圆环、细斜纹、名字上面一道短线 */
+{const _ch2=consHTML;consHTML=function(k,cls){const h=_ch2.apply(this,arguments);return h.replace('<div class="fuIn">','<div class="fuIn"><i class="fuDeco"></i>')}}
