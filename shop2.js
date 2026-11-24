@@ -26,3 +26,7 @@ Object.assign(PARTNERS,{
  p4_aurora:{t:"王牌",n:"极光奶蛋",img:"e_egar",r:"E",p:9,d:"单出一张王、或者出一对王：按炸弹的筹码和倍率算",hand:x=>{if(x.cards.length<=2&&x.cards.length&&x.cards.every(isJoker)){const a=handBase(x.type),b=handBase("bomb4");const dc=Math.max(0,b.c-a.c),dm=Math.max(0,b.m-a.m);x.chips+=dc;x.mult+=dm;return`按炸弹算 +${dc} 筹码 +${dm} 倍率`}}}});
 SETS_OFF["王牌"]={d:"每张王计分时 倍率 ×1.5"};
 {const _eh=extraHand;extraHand=function(x,G){const out=_eh.apply(this,arguments)||[];try{if(setOn(G,"王牌")){const k=(x.cards||[]).filter(isJoker).length;if(k){const m=r1(Math.pow(1.5,k));x.mult=r1(x.mult*m);out.push(`王牌凑齐了 ×${m}`)}}}catch(e){}return out}}
+
+/* ---------- 1.9：打 3 起前期稍微难一点（打 2 不变，越往后加得越少，打 10 起和以前一样） ---------- */
+const LV_HARD=[1,1.1,1.2,1.25,1.2,1.15,1.1,1.05];
+{const _tg=targetOf;targetOf=function(lv,b){const t=_tg(lv,b);if(G&&G.endless&&(G.loop||1)>1)return t;const k=LV_HARD[lv]||1;return k===1?t:Math.round(t*k/10)*10}}
