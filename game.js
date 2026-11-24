@@ -322,7 +322,7 @@ function codex(){SFX.click();const by={};for(const k in PARTNERS){const P=PARTNE
 const CONTACT_MAIL=""; // 反馈邮箱：等作者给了填上
 function sponsor(){SFX.click();ov(`<div class="box"><div class="zsBox"><div class="zsL"><img src="img/zanshang.jpg" alt="赞赏码"><p>微信扫一扫</p></div><div class="zsR"><h2 style="text-align:left">作者的话</h2><p>做《奶蛙牌》的时候，我们白天上班，晚上熬夜，一张牌一张牌地画，一个伙伴一个伙伴地调。</p><p>如果你喜欢《奶蛙牌》，可以扫左边的码<b>支持</b>我们。也非常欢迎<b>提建议</b>，每一条我们都会认真看。</p>${CONTACT_MAIL?`<p>邮箱：<b>${CONTACT_MAIL}</b></p>`:""}<p>B站搜索<b>乔乔 奶蛙工作室</b>、<b>龙井茉莉 奶蛙工作室</b>，继续关注我们。</p><button class="btn" onclick="closeOv()">关闭</button></div></div></div>`)}
 /* 信箱：给新人的一封信 */
-const LETTERS=[{id:"hello",t:"给新来的你",from:"奶蛙工作室",body:["欢迎来到《奶蛙牌》！","这是奶蛙工作室做的第二个游戏。第一个是《奶蛙之塔》，如果你玩过，会在牌桌上遇到很多老朋友。","《奶蛙牌》用掼蛋的牌型来打：凑牌型、压住对手的牌、攒一队伙伴，从打 2 一路打到打 A。","不会掼蛋也没关系，第一局长老会手把手教你。","游戏还在一点点做。有什么想法、遇到 bug，都欢迎告诉我们。","B站关注我们：<b>乔乔 奶蛙工作室</b>　<b>龙井茉莉 奶蛙工作室</b>"]}];
+const LETTERS=[{id:"hello",t:"给新来的你",from:"奶蛙工作室",body:["欢迎来到《奶蛙牌》！","这是奶蛙工作室做的第三个游戏。前两个是《奶蛙之塔》和《抓奶蛙》，如果你玩过，会在牌桌上遇到很多老朋友。","《奶蛙牌》用掼蛋的牌型来打：凑牌型、压住对手的牌、攒一队伙伴，从打 2 一路打到打 A。","不会掼蛋也没关系，第一局长老会手把手教你。","游戏还在一点点做。有什么想法、遇到 bug，都欢迎告诉我们。","B站关注我们：<b>乔乔 奶蛙工作室</b>　<b>龙井茉莉 奶蛙工作室</b>"]}];
 function lsGet(k){try{return JSON.parse(localStorage.getItem("np-"+k)||"null")}catch(e){return null}}
 function lsSet(k,v){try{localStorage.setItem("np-"+k,JSON.stringify(v))}catch(e){}}
 function mailUnread(){const r=lsGet("mailRead")||{};return LETTERS.some(l=>!r[l.id])}
