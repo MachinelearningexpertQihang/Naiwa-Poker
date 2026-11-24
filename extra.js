@@ -25,7 +25,7 @@ function hintList(){const lv=lvNow();const H=G.hand.filter(c=>!c.frz&&!c.mud&&!c
  const all=Object.values(best);all.sort((a,b)=>(b.bt-a.bt)||(b.est-a.est));return all.slice(0,12)}
 function hintNext(){if(!G||G.busy)return;SFX.click();if(!G.hints||G.hintHand!==G.hand.map(c=>c.id).join()){G.hints=hintList();G.hintI=0;G.hintHand=G.hand.map(c=>c.id).join()}
  if(!G.hints.length){toast("手里凑不出能看见的牌型");return}const h=G.hints[G.hintI%G.hints.length];G.hintI++;G.sel=new Set(h.cs.map(c=>c.id));renderHand();renderPreview();
- toast(`${h.bt?"能压住：":"压不住，但能出："}<b>${HANDS[h.j.type].n}</b>（${G.hintI}/${G.hints.length}）`)}
+ toast(`${h.bt?"能压住：":"压不住，但能出："}<b>${HANDS[h.j.type].n}</b>（${(G.hintI-1)%G.hints.length+1}/${G.hints.length}）`)}
 
 /* ---------- 牌型表：例子 + 谁压谁 ---------- */
 const HAND_EX={single:"5",pair:"8 8",twopair:"5 5 + 9 9",triple:"J J J",fullhouse:"9 9 9 + 4 4",straight:"3 4 5 6 7",flush:"同一个花色的任意 5 张",tube:"5 5 6 6 7 7",plate:"8 8 8 9 9 9",bomb4:"7 7 7 7",bomb5:"Q×5",sflush:"同花色 3 4 5 6 7",bomb6:"K×6",bomb7:"A×7",bomb8:"2×8",rocket:"小王 小王 大王 大王"};
