@@ -16,6 +16,7 @@ const HANDS={
  triple:{n:"三张",c:25,m:3},
  fullhouse:{n:"三带二",c:40,m:4},
  straight:{n:"顺子",c:35,m:4},
+ flush:{n:"同花",c:40,m:4},
  tube:{n:"三连对",c:50,m:5},
  plate:{n:"钢板",c:65,m:6},
  bomb4:{n:"炸弹",c:60,m:7},
@@ -25,7 +26,7 @@ const HANDS={
  bomb7:{n:"七炸",c:180,m:18},
  bomb8:{n:"八炸",c:250,m:24},
  rocket:{n:"天王炸",c:400,m:40}};
-const HAND_ORDER=["single","pair","twopair","triple","fullhouse","straight","tube","plate","bomb4","bomb5","sflush","bomb6","bomb7","bomb8","rocket"];
+const HAND_ORDER=["single","pair","twopair","triple","fullhouse","straight","flush","tube","plate","bomb4","bomb5","sflush","bomb6","bomb7","bomb8","rocket"];
 
 let NOWILD=false,INVERT=false;
 const isWild=(c,lv)=>!NOWILD&&c.s!==4&&(c.wild||(c.s===1&&c.r===lv));
@@ -75,6 +76,8 @@ function judge(cards,lv){
  if(n===5)for(const st of STRAIGHT_STARTS){const want=[0,1,2,3,4].map(i=>st+i);if(want[4]>14)continue;
   if(fitSeq(plain,want,1,wild)){const flush=plain.length&&plain.every(c=>c.s===plain[0].s)&&(!wild||plain.every(c=>c.s===1)||true);
    const ps=plain.filter(c=>!c.cham&&c.en!=="cham");const sameSuit=ps.every(c=>c.s===ps[0].s);push(sameSuit?"sflush":"straight",st+4)}}
+ // 同花：正好 5 张同一个花色（变色牌算任何花色，逢人配可以补）；连着的话就是同花顺
+ if(n===5){const ps=plain.filter(c=>c.en!=="cham");if(ps.length&&ps.every(c=>c.s===ps[0].s)){const pw=plain.map(c=>power(c.r,lv)).sort((a,b)=>b-a);let k=0;pw.forEach(v=>k=k*16+v);for(let i=pw.length;i<5;i++)k=k*16+15;push("flush",k)}}
  // 三连对：6 张
  if(n===6)for(const st of STRAIGHT_STARTS){const want=[0,1,2].map(i=>st+i);if(want[2]>14)continue;if(fitSeq(plain,want,2,wild))push("tube",st+2)}
  // 钢板：6 张，两个连着的三张

@@ -785,3 +785,4 @@ body.port{background:#0a0508}
 .cardInfo .ciTag{display:inline-block;margin:10px 0 0;padding:1px 8px 2px;border-radius:4px;font-size:13px;color:#fff;background:#6b5a4a}
 .cardInfo .ciTag.trib{background:#b0352a}.cardInfo .ciTag.wild{background:#c8455a}.cardInfo .ciTag.lv{background:#b8860b}
 .cardInfo .ciTag.en{background:#3a6ea8}.cardInfo .ciTag.ed{background:#8a5ac8}.cardInfo .ciTag.seal{background:#2f8a5a}.cardInfo .ciTag.bad{background:#555}
+#shRe small.reHint{display:block;font-size:11px;opacity:.85;margin-top:2px;line-height:1}

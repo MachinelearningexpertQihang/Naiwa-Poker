@@ -142,7 +142,7 @@ function cardName(c){return c.s===4?(c.r===17?"大王":"小王"):SUITS[c.s]+rank
 function bossTake(G){const h=hand0(G).filter(c=>c.s<4);if(!h.length)return;const lv=lvNow();h.sort((a,b)=>power(b.r,lv)-power(a.r,lv));const c=h[0];G.hand.splice(G.hand.indexOf(c),1);(G.taken=G.taken||[]).push(c);toast(`堕天奶蛙抗贡：拿走了你的 ${cardName(c)}`)}
 
 /* 茶包：升级牌型（每一级加的筹码、倍率） */
-const TEA={single:[10,1],pair:[15,1],twopair:[20,1],triple:[20,2],fullhouse:[25,2],straight:[30,3],tube:[30,3],plate:[35,3],bomb:[40,4],sflush:[40,4],rocket:[60,6]};
+const TEA={single:[10,1],pair:[15,1],twopair:[20,1],triple:[20,2],fullhouse:[25,2],straight:[30,3],flush:[30,3],tube:[30,3],plate:[35,3],bomb:[40,4],sflush:[40,4],rocket:[60,6]};
 const teaKey=t=>/^bomb/.test(t)?"bomb":t;
 
 /* 每一级（打 2 ～ 打 A）的基础血量 */

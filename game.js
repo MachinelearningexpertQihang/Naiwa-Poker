@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="1.7";
+const VER="1.8";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -97,11 +97,12 @@ function drawTo(){let k=0;const got=[];while(G.hand.length<G.handSize&&G.draw.le
 
 /* 上家的牌：小关小一点，首领关大一点 */
 function genUpper(){const lv=lvNow();const tier=G.blind;const BB=G.boss&&BOSSES[G.boss];const lo=[3,6,9][tier],hi=[9,12,14][tier];const R=()=>lo+ri(hi-lo+1);const mk=(r,s)=>({id:"u"+ri(1e9),s:s==null?ri(4):s,r});
- let types=tier===0?["single","pair","pair","triple"]:tier===1?["pair","triple","straight","fullhouse"]:["triple","fullhouse","straight","tube","bomb4"];if(G.foe&&G.foe.like)types=types.concat(G.foe.like,G.foe.like);if(BB&&BB.bombs)types=BB.bombs;if(BB&&BB.snowT)types=[BB.snowT[Math.min(G.snow||0,BB.snowT.length-1)]];
+ let types=tier===0?["single","pair","pair","triple"]:tier===1?["pair","triple","straight","fullhouse","flush"]:["triple","fullhouse","straight","flush","tube","bomb4"];if(G.foe&&G.foe.like)types=types.concat(G.foe.like,G.foe.like);if(BB&&BB.bombs)types=BB.bombs;if(BB&&BB.snowT)types=[BB.snowT[Math.min(G.snow||0,BB.snowT.length-1)]];
  for(let k=0;k<20;k++){const t=pick(types);let cs=[];const r=R();
   if(t==="single")cs=[mk(r)];else if(t==="pair")cs=[mk(r,0),mk(r,2)];else if(t==="triple")cs=[mk(r,0),mk(r,2),mk(r,3)];
   else if(t==="fullhouse"){let p=R();if(p===r)p=r>3?r-1:r+1;cs=[mk(r,0),mk(r,2),mk(r,3),mk(p,0),mk(p,3)]}
   else if(t==="straight"){const st=Math.min(r,10);cs=[0,1,2,3,4].map(i=>mk(st+i,[0,2,3,0,2][i]))}
+  else if(t==="flush"){const su=ri(4);const rs=shuffleArr([2,3,4,5,6,7,8,9,10,11,12,13,14].filter(x=>x!==lv)).slice(0,5);cs=rs.map(x=>mk(x,su))}
   else if(t==="tube"){const st=Math.min(r,12);cs=[0,1,2].flatMap(i=>[mk(st+i,0),mk(st+i,2)])}
   else if(t==="plate"){const st=Math.min(r,13);cs=[0,1].flatMap(i=>[mk(st+i,0),mk(st+i,2),mk(st+i,3)])}
   else if(/^bomb\d/.test(t)){const n=+t[4];const rr=3+ri(BB&&BB.final?10:7);cs=[...Array(n)].map((_,q)=>mk(rr,[0,2,3,0,1,2,3,0][q]))}
@@ -253,7 +254,7 @@ function runEnd(win){}
 function shopOpen(){const own=new Set(G.partners);const pool=Object.keys(PARTNERS).filter(k=>!own.has(k)&&isUnlocked(k));const rar=()=>{const r=rnd();return r<.6?"C":r<.9?"R":r<.98?"E":"L"};
  G.shop={items:[]};const pp=()=>{for(let k=0;k<30;k++){const r=rar();const c=pool.filter(x=>PARTNERS[x].r===r&&!G.shop.items.some(y=>y.id===x));if(c.length)return pick(c)}return pick(pool)};
  G.shop.items.push({k:"partner",id:pp()});G.shop.items.push({k:"partner",id:pp()});
- G.shop.items.push({k:"tea",id:pick(Object.keys(TEA)),p:3});G.shop.items.push({k:"pack",id:"card",p:4,n:4});G.shop.items.push({k:"teapack",p:4,n:3});G.shop.items.push({k:"pack",id:"gold",p:6,n:3});
+ G.shop.items.push({k:"tea",id:teaPickW(1)[0],p:3});G.shop.items.push({k:"pack",id:"card",p:4,n:4});G.shop.items.push({k:"teapack",p:4,n:3});G.shop.items.push({k:"pack",id:"gold",p:6,n:3});
  show("shop");bgScene("shop");shopRender()}
 let ptP=id=>PARTNERS[id].p+((G.diff||0)>=4?1:0);let packP=it=>Math.max(1,it.p-(it.k!=="tea"&&G.partners.includes("xg")?2:0)+((G.diff||0)>=4?1:0));
 function shopRender(){const S_=G.shop;
@@ -266,7 +267,7 @@ function shopRender(){const S_=G.shop;
  <div class="shFoot"><button class="btn green" id="shRe">换一批伙伴 · ${G.partners.includes("dgy")?2:G.reroll}</button><button class="btn" id="shNext">下一关</button></div></div>`;
  renderSide();renderPartners();
  $$("#shop .shItem[data-i]").forEach(e=>e.onclick=()=>shopBuy(+e.dataset.i));
- $("#shRe").onclick=()=>{const rc=G.partners.includes("dgy")?2:G.reroll;if(G.gold<rc){toast("金币不够");SFX.bad();return}G.gold-=rc;if(rc===G.reroll)G.reroll++;const own=new Set(G.partners);const pool=Object.keys(PARTNERS).filter(k=>!own.has(k)&&isUnlocked(k)&&!G.shop.items.some(y=>y.id===k));G.shop.items.forEach(it=>{if(it.k==="partner"){it.id=pick(pool);it.sold=0}});SFX.coin();shopRender()};
+ $("#shRe").onclick=()=>{const rc=G.partners.includes("dgy")?2:G.reroll;if(G.gold<rc){toast("金币不够");SFX.bad();return}G.gold-=rc;if(rc===G.reroll)G.reroll++;const own=new Set(G.partners);const pool=Object.keys(PARTNERS).filter(k=>!own.has(k)&&isUnlocked(k)&&!G.shop.items.some(y=>y.id===k));const rb=(G.shop.rr=(G.shop.rr||0)+1);G.shop.items.forEach(it=>{if(it.k==="partner"){it.id=ptRoll(pool.filter(x=>!G.shop.items.some(y=>y!==it&&y.id===x)),rb);it.sold=0}});SFX.coin();shopRender()};
  $("#shNext").onclick=()=>{SFX.click();blindSelect()}}
 async function shopBuy(i){const it=G.shop.items[i];if(it.sold)return;const price=it.k==="partner"?ptP(it.id):packP(it);if(G.gold<price){toast("金币不够");SFX.bad();return}
  if(it.k==="partner"){if(G.partners.length>=(G.pmax||5)){toast(`伙伴最多带 ${G.pmax||5} 个，先卖掉一个`);return}G.gold-=price;G.partners.push(it.id);it.sold=1;SFX.coin();shopRender();return}
@@ -290,7 +291,7 @@ function openPack(it){return new Promise(res=>{const cs=[...Array(it.n)].map(()=
 const TEA_COL={single:"#8a8a9a",pair:"#4fa3ff",triple:"#3fae6b",fullhouse:"#f0a54a",straight:"#c86bff",tube:"#ff6b9a",plate:"#2ec4c4",bomb:"#e8333d",sflush:"#ffb800",rocket:"#7a3cff"};
 const TEA_N={single:"清茶",pair:"双拼奶茶",triple:"三分糖",fullhouse:"芋泥波波",straight:"杨枝甘露",tube:"三层奶盖",plate:"钢板烤奶",bomb:"爆爆珠",sflush:"满杯水果",rocket:"王炸霸气"};
 function teaCardHTML(id,i){const H=HANDS[id==="bomb"?"bomb4":id],L=G.hl[id]||0,T=TEA[id];return`<div class="teaC" data-id="${id}" style="--tc:${TEA_COL[id]};--i:${i}"><div class="tcTop">${TEA_N[id]}</div><img src="${IMG("cup")}"><b>${id==="bomb"?"所有炸弹":H.n}</b><div class="lvUp">Lv${L+1} → <i>Lv${L+2}</i></div><div class="gain"><span class="c">+${T[0]}</span><span class="m">+${T[1]}</span></div></div>`}
-function openTeaPack(n){return new Promise(res=>{const ids=shuffleArr(Object.keys(TEA)).slice(0,n);
+function openTeaPack(n){return new Promise(res=>{const ids=teaPickW(n);
  ov(`<div class="box"><h2>茶包礼盒</h2><p class="msg">挑一个茶包，喝了这个牌型就升一级</p><div class="tpRow">${ids.map((id,i)=>teaCardHTML(id,i)).join("")}</div><button class="btn dark" id="tpSkip">都不要</button></div>`);
  $$(".teaC").forEach(e=>{tiltOn(e);e.onclick=()=>{const id=e.dataset.id;G.hl[id]=(G.hl[id]||0)+1;SFX.shine();bgKick(.4);e.classList.add("taken");toast(`<b>${id==="bomb"?"炸弹":HANDS[id].n}</b> 升到 Lv${G.hl[id]+1}`);setTimeout(()=>{closeOv();res(id)},450)}});
  $("#tpSkip").onclick=()=>{closeOv();res(null)}})}
