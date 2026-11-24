@@ -24,7 +24,7 @@ function bgInit(){const st=document.getElementById("stage"),cv=document.getEleme
  if(!document.getElementById("bgimg")){const d=document.createElement("div");d.id="bgimg";d.innerHTML=`<i class="bgL"></i><i class="bgL"></i><b class="bgTint"></b><b class="bgShade"></b>`;st.insertBefore(d,cv)}
  const gl=cv.getContext("webgl",{antialias:false,premultipliedAlpha:false,alpha:true});if(!gl){cv.style.display="none";return}
  const vs=`attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}`;
- const fs=`precision mediump float;uniform vec2 R;uniform float T,H,B;uniform int P;uniform vec3 F,C;
+ const fs=`precision mediump float;uniform vec2 R;uniform float T,H,B,L;uniform int P;uniform vec3 F,C;
  float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
  float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
  float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*n(p);p*=2.03;a*=.5;}return v;}
@@ -35,30 +35,30 @@ function bgInit(){const st=document.getElementById("stage"),cv=document.getEleme
   // 雾：从下往上淡淡飘
   float fg=fbm(uv*vec2(2.2,3.)+vec2(t*.04,-t*.025))*fbm(uv*1.3-vec2(t*.02,0.));float low=smoothstep(.75,0.,uv.y/(R.x/R.y)*1.6);
   float fa=fg*(.32+.25*low)*(.9+B*.4);
-  vec3 col=F*fa;float a=fa*.85;
+  vec3 col=F*fa*.75;float a=fa*.85;
   // 飘的东西
   float pt=0.;
-  if(P==0){pt=parts(uv,9.,t,.25,1.)+parts(uv+3.1,14.,t,.18,1.)*.7;}        // 萤火
+  if(L>.5){}else if(P==0){pt=parts(uv,9.,t,.25,1.)+parts(uv+3.1,14.,t,.18,1.)*.7;}        // 萤火
   else if(P==1){pt=parts(uv,10.,t,.55,1.)+parts(uv+1.7,16.,t,.8,1.)*.6;}     // 火星
   else if(P==2){pt=parts(uv,10.,t,.35,-1.)+parts(uv+5.3,18.,t,.25,-1.)*.8;}  // 雪
   else if(P==3){pt=parts(uv,7.,t,.3,1.)*.8+parts(uv+2.2,12.,t,.45,1.)*.6;}   // 气泡
   else if(P==4){pt=parts(uv,12.,t*.2,.05,1.)+parts(uv+9.,20.,t*.2,.03,1.)*.8;}// 星光
   else {pt=parts(uv,11.,t,.12,1.)*.7+parts(uv+4.,6.,t,.08,-1.)*.5;}          // 沙尘
-  pt*=1.+H*1.5;col+=C*pt;a=max(a,pt*.95);
+  pt*=1.+H*.6;col+=C*pt;a=max(a,pt*.95);
   // 首领：四周泛紫红
   vec2 c=gl_FragCoord.xy/R-.5;float vg=smoothstep(.25,.75,length(c));col+=vec3(.5,.05,.4)*vg*B*.9;a=max(a,vg*B*.55);
-  col+=vec3(1.,.8,.4)*H*.12;a=max(a,H*.12);
+  col+=vec3(1.,.8,.4)*H*.04;a=max(a,H*.04);
   gl_FragColor=vec4(col/max(a,.001),clamp(a,0.,1.));}`;
  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.warn(gl.getShaderInfoLog(o));return o};
  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,vs));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,fs));gl.linkProgram(pr);gl.useProgram(pr);
  const bf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,bf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
  const lp=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(lp);gl.vertexAttribPointer(lp,2,gl.FLOAT,false,0,0);
- const U=n=>gl.getUniformLocation(pr,n);const uR=U("R"),uT=U("T"),uH=U("H"),uB=U("B"),uP=U("P"),uF=U("F"),uC=U("C");
+ const U=n=>gl.getUniformLocation(pr,n);const uR=U("R"),uT=U("T"),uH=U("H"),uB=U("B"),uP=U("P"),uF=U("F"),uC=U("C"),uL=U("L");
  cv.width=480;cv.height=270;gl.viewport(0,0,480,270);gl.clearColor(0,0,0,0);
  const lerp=(a,b,k)=>a.map((v,i)=>v+(b[i]-v)*k);
- let last=0;const loop=now=>{requestAnimationFrame(loop);if(document.hidden||!BGFX.on)return;if(now-last<40)return;last=now;
-  BGFX.hot*=.95;if(BGFX.tf){BGFX.fog=lerp(BGFX.fog,BGFX.tf[0],.05);BGFX.pc=lerp(BGFX.pc,BGFX.tf[1],.05)}BGFX.boss+=(BGFX.tb-BGFX.boss)*.05;
-  gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform2f(uR,480,270);gl.uniform1f(uT,(now-BGFX.t0)/1000);gl.uniform1f(uH,Math.min(1,BGFX.hot));gl.uniform1f(uB,BGFX.boss);gl.uniform1i(uP,BGFX.p);
+ let last=0;const loop=now=>{requestAnimationFrame(loop);if(document.hidden||!BGFX.on)return;if(now-last<(BGFX.lite?100:40))return;last=now;
+  BGFX.hot*=BGFX.lite?.8:.9;if(BGFX.tf){BGFX.fog=lerp(BGFX.fog,BGFX.tf[0],.05);BGFX.pc=lerp(BGFX.pc,BGFX.tf[1],.05)}BGFX.boss+=(BGFX.tb-BGFX.boss)*.05;
+  gl.clear(gl.COLOR_BUFFER_BIT);gl.uniform2f(uR,480,270);gl.uniform1f(uT,(now-BGFX.t0)/1000);gl.uniform1f(uH,Math.min(1,BGFX.hot));gl.uniform1f(uB,BGFX.boss);gl.uniform1i(uP,BGFX.p);gl.uniform1f(uL,BGFX.lite?1:0);
   gl.uniform3fv(uF,BGFX.fog);gl.uniform3fv(uC,BGFX.pc);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)};
  requestAnimationFrame(loop)}
 function bgImage(k){if(BGFX.img===k)return;BGFX.img=k;const L=[...document.querySelectorAll("#bgimg .bgL")];if(L.length<2)return;const on=L.find(x=>x.classList.contains("on"))||L[1],nx=on===L[0]?L[1]:L[0];
@@ -67,7 +67,7 @@ function bgImage(k){if(BGFX.img===k)return;BGFX.img=k;const L=[...document.query
 function bgScene(k,lv){const S=k==="lv"||k==="boss"?locOf(lv):BG_SP[k]||BG_SP.title;bgImage(S.k);BGFX.tf=[S.fog,S.pc];BGFX.p=S.p;BGFX.tb=k==="boss"?1:0;
  const tint=document.querySelector("#bgimg .bgTint");if(tint)tint.className="bgTint "+(k==="boss"?"boss":k==="shop"?"warm":"")}
 function bgTheme(){}function bgMode(){}
-function bgKick(v){BGFX.hot=Math.min(1.2,BGFX.hot+v)}
+function bgKick(v){BGFX.hot=Math.min(.6,BGFX.hot+v*.5)}
 
 /* ---------- 声音：奶蛙之塔里的真实音效（CC0） + 合成的牌声
    吸取奶蛙之塔的教训：

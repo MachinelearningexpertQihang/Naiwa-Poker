@@ -62,7 +62,7 @@ Object.assign(PARTNERS,{
  /* 压牌流：一直压着对手打 */
  v_champ:{t:"压牌",n:"不灭的斗士",img:"v_champ",r:"R",p:7,d:"连续压住：每连 1 次 倍率 +6",hand:x=>{if(x.streak){const v=6*x.streak;x.mult+=v;return`连压 ${x.streak}：+${v} 倍率`}}},
  v_shielder:{t:"压牌",n:"盾斗士",img:"v_shielder",r:"C",p:5,d:"没压住时不打七五折",hand:x=>{if(!x.beat){x.noMiss=1;return"顶住了"}}},
- v_archer:{t:"压牌",n:"弓斗士",img:"v_archer",r:"R",p:7,d:"压住时的 ×1.5 变成 ×2",hand:x=>{if(x.beat){x.beatX=2;return"压住 ×2"}}},
+ v_archer:{t:"压牌",n:"弓斗士",img:"v_archer",r:"R",p:7,d:"压住时的 ×1.25 变成 ×1.75",hand:x=>{if(x.beat){x.beatX=Math.max(x.beatX||1.25,1.75);return"压住 ×1.75"}}},
  ckr:{t:"压牌",n:"斗鸡",img:"ckr",r:"C",p:5,d:"用炸弹压住对手：倍率 +15",hand:x=>{if(x.beat&&x.isBomb){x.mult+=15;return"+15 倍率"}}},
  v_mcolo:{t:"压牌",n:"老斗兽场",img:"v_mcolo",r:"C",p:4,d:"这一关压住 3 次以上，过关 +5 金币",end:G=>(G.beatsThis||0)>=3?5:0},
  /* 奶蛙池流 */
@@ -120,7 +120,7 @@ const BOSSES={
   turn:G=>{G.curseSuit=Math.floor(rnd()*4)},skip:(c,G)=>c.s===G.curseSuit&&!isWild(c,lvNow()),line:G=>`诅咒：<b class="hred">${SUITS[G.curseSuit]}</b> 不计分`},
  xch:{n:"冰原血兽",img:"xch",d:"冰冻：开局冻住 2 张手牌，之后每一手再冻 1 张。冻住的牌 2 手以后才化开",say:["吼？！","冻住你！","好冷……"],
   start:G=>{shuffleArr(hand0(G)).slice(0,2).forEach(c=>c.frz=3)},turn:G=>{G.hand.forEach(c=>{if(c.frz)c.frz--});if(!G.first)shuffleArr(hand0(G)).slice(0,1).forEach(c=>c.frz=2)}},
- v_snowk2:{n:"雪球大王",img:"v_snowk2",d:"越滚越大：每被你压住一次，它下一手就大一档。没压住伤害只剩一半",say:["不可能！","滚起来！","化……了"],dyn:1,missX:.5,
+ v_snowk2:{n:"雪球大王",img:"v_snowk2",d:"越滚越大：每被你压住一次，它下一手就大一档。没压住伤害只剩三分之一",say:["不可能！","滚起来！","化……了"],dyn:1,missX:.35,
   start:G=>{G.snow=0},snowT:["pair","triple","fullhouse","tube","plate","bomb4","bomb5","bomb6","bomb7"],line:G=>`雪球第 <b>${G.snow+1}</b> 档`},
  v_brock:{n:"岩甲奶蛙",img:"v_brock",d:"岩甲：先要打穿 25% 血量的护甲。压住时打护甲 ×2，炸弹直接无视护甲",say:["甲……裂了？","你打不动我","碎了……"],
   start:G=>{G.armor=Math.round(G.target*.25)},line:G=>G.armor>0?`护甲 <b>${G.armor.toLocaleString()}</b>`:"护甲碎了"},

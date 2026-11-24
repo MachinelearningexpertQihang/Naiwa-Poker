@@ -105,7 +105,7 @@ const SETS_OFF={
  "炸弹":{d:"炸弹按多一张算（四炸当五炸，五炸当六炸……）"},
  "连牌":{d:"顺子、三连对、钢板、同花顺 倍率 ×1.5"},
  "牌型":{d:"两对、三张、三带二 筹码 +60"},
- "压牌":{d:"压住对手时 ×2（原来 ×1.5）"},
+ "压牌":{d:"压住对手时 ×2（原来 ×1.25）"},
  "花色":{d:"打出的牌全是同一个花色（至少 2 张）：倍率 ×2"},
  "奶蛙池":{d:"这一手每消除一次，倍率 +6"},
  "经济":{d:"每出一手 +1 金币"},
@@ -127,7 +127,7 @@ function extraHand(x,G){const out=[];const lv=x.lv,cs=x.cards||[];
  if(setOn(G,"炸弹")&&/^bomb[4-7]$/.test(x.type)){const n=+x.type.slice(4),a=handBase(x.type),b=handBase("bomb"+(n+1));x.chips+=b.c-a.c;x.mult+=b.m-a.m;out.push(`炸弹套装：按 ${n+1} 炸算`)}
  if(setOn(G,"连牌")&&/straight|tube|plate|sflush/.test(x.type)){x.mult=r1(x.mult*1.5);out.push("连牌套装 ×1.5")}
  if(setOn(G,"牌型")&&/twopair|triple|fullhouse/.test(x.type)){x.chips+=60;out.push("牌型套装 +60 筹码")}
- if(setOn(G,"压牌")&&x.beat){x.beatX=Math.max(x.beatX||1.5,2);out.push("压牌套装：压住 ×2")}
+ if(setOn(G,"压牌")&&x.beat){x.beatX=Math.max(x.beatX||1.25,2);out.push("压牌套装：压住 ×2")}
  if(setOn(G,"花色")&&cs.length>=2&&cs.every(c=>c.s<4&&c.s===cs[0].s)){x.mult=r1(x.mult*2);out.push("花色套装 ×2")}
  if(setOn(G,"奶蛙池")&&x.bursts){x.mult+=6*x.bursts;out.push(`奶蛙池套装 +${6*x.bursts} 倍率`)}
  if(setOn(G,"经济")){G.gold+=1;out.push("经济套装 +1 金币")}
@@ -172,7 +172,7 @@ function startDaily(){const k=dailyKey(),R=dailyRule(k);closeOv();newRun("naiwa"
  if(R.id==="friends"){G.pmax=4;const pool=Object.keys(PARTNERS).filter(x=>PARTNERS[x].r==="C"||PARTNERS[x].r==="R");for(let i=0;i<2;i++){const p=pick(pool.filter(x=>!G.partners.includes(x)));G.partners.push(p)}}
  M.dailyTry=M.dailyTry||{};G.dailyRanked=!M.dailyTry[k];M.dailyTry[k]=1;saveMeta();blindSelect();toast(`<b>每日挑战 · ${R.n}</b>　${R.d}${G.dailyRanked?"":"<br>（今天已经挑战过，这一局是练习，不上日榜）"}`)}
 {const _sb4=startBlind;startBlind=function(){const r=_sb4.apply(this,arguments);try{if(dailyHas("nowild")){NOWILD=true;render()}if(dailyHas("boss")&&G.boss){G.target=Math.round(G.target*1.3);renderUpper();renderSide()}}catch(e){}return r}}
-{const _eh=extraHand;extraHand=function(x,G){const out=_eh(x,G)||[];try{if(dailyHas("bomb")&&x.isBomb){x.mult=r1(x.mult*2);out.push("炸弹日 ×2")}if(dailyHas("boss")&&G.boss&&x.beat){x.beatX=Math.max(x.beatX||1.5,2);out.push("首领日：压住 ×2")}}catch(e){}return out}}
+{const _eh=extraHand;extraHand=function(x,G){const out=_eh(x,G)||[];try{if(dailyHas("bomb")&&x.isBomb){x.mult=r1(x.mult*2);out.push("炸弹日 ×2")}if(dailyHas("boss")&&G.boss&&x.beat){x.beatX=Math.max(x.beatX||1.25,2);out.push("首领日：压住 ×2")}}catch(e){}return out}}
 {const _pkP=packP;packP=it=>dailyHas("rich")?Math.round(_pkP(it)*1.5):_pkP(it)}
 {const _ptP=ptP;ptP=id=>dailyHas("rich")?Math.round(_ptP(id)*1.5):_ptP(id)}
 // 日榜：平台只有「本周 / 总榜」，所以把日期藏在分数里：分 = 第几天 × 10 万 + 走过的关数 × 1000 + 最痛一手（千）

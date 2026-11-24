@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="2.0";
+const VER="2.1";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -135,7 +135,7 @@ function partnerTip(i,el){const id=G.partners[i],P=PARTNERS[id];SFX.click();tip(
 function renderUpper(){const u=G.upper,f=G.foe;const BB=G.boss&&BOSSES[G.boss];if(!u||!f){$("#upper").innerHTML="";return}const hp=Math.max(0,G.target-G.score);
  $("#upper").innerHTML=`<div class="foe ${f.boss?"boss":""}"><div class="foeImg"><img src="${IMG(f.img)}"><i class="foeSay"></i></div><div class="foeInfo"><b class="foeN">${f.boss?`<em>首领</em>`:""}${f.n}</b><div class="hpBar"><i style="width:${hp/G.target*100}%"></i><span>${hp.toLocaleString()}</span></div></div></div>
  <div class="upR"><div class="upLbl">它出了<b>${HANDS[u.j.type].n}</b><span class="upInt">${G.nextUp?`下一手：<b>${HANDS[G.nextUp.j.type].n}</b>`:BB&&BB.dyn?"下一手：<b>更大</b>":""}</span></div><div class="upCards">${u.cards.map((c,k)=>cardHTML(c,{cls:"mini up2"+(G.upFresh?" upIn":""),st:"--i:"+k})).join("")}</div>
- <div class="upMeta"><span class="upHint">压住 <b>×${(G.partners.includes("v_archer")?2:1.5)}</b> · 压不住 <b class="m">×${BB&&BB.missX||G.eMiss||((G.diff||0)>=8?.5:.6)}</b></span>${BB&&BB.line?`<span class="upPro">${BB.line(G)}</span>`:""}${INVERT?`<span class="upPro">倒转：越小越大</span>`:""}</div></div>`}
+ <div class="upMeta"><span class="upHint">压住 <b>×${setOn(G,"压牌")?2:G.partners.includes("v_archer")?1.75:1.25}</b> · 压不住 <b class="m">×${BB&&BB.missX||G.eMiss||((G.diff||0)>=8?.4:.5)}</b></span>${BB&&BB.line?`<span class="upPro">${BB.line(G)}</span>`:""}${INVERT?`<span class="upPro">倒转：越小越大</span>`:""}</div></div>`}
 function renderPool(fresh){G.upFresh=0;const P=G.pool||[];$("#pool").innerHTML=`<div class="plTop"><span>奶蛙池</span><span>同一家凑齐 3 只就消除</span></div><div class="plSlots">${[...Array(7)].map((_,i)=>{const t=P[i];return t==null?`<i class="tok e"></i>`:`<i class="tok ${fresh&&i===P.length-1?"new":""}" style="--fc:${FAMS[t].c}"><img src="${IMG(FAMS[t].img)}"></i>`}).join("")}</div>
  <div class="plFam">${FAMS.slice(0,4).map((F,i)=>`<span style="--fc:${F.c}"><i></i>${SUITS[i]}${F.n} ${F.burst}</span>`).join("")}</div>`}
 function renderDeck(){const n=G.draw.length;$("#deck").innerHTML=[0,1,2,3].slice(0,Math.max(1,Math.ceil(n/27))).map(k=>`<i style="--k:${k}"></i>`).join("")+`<b>${n} / ${G.deck.length}</b>`;$("#deck").onclick=deckView}
@@ -166,21 +166,23 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
   el&&el.classList.remove("hit");void(el&&el.offsetWidth);el&&el.classList.add("hit");
   const cc=cardChips(c,lv)+(c.en==="ice"?(G.partners.includes("nx")?30:15)*(c.age||0):0);x.chips+=cc;popOn(el,"+"+cc,"chip");SFX.chip(k);setCM(x);await sleep(190);
   if(c.ed==="foil"){x.chips+=30;popOn(el,"+30","chip");SFX.chip(k+2);setCM(x);await sleep(190)}
-  if(c.ed==="poly"){x.mult=r1(x.mult*1.5);popOn(el,"×1.5","xm");SFX.xmult();setCM(x);await sleep(220)}
+  if(c.ed==="poly"){const px=polyX(G);x.mult=r1(x.mult*px);popOn(el,"彩虹 ×"+px,"xm");SFX.xmult();setCM(x);await sleep(220)}
   if(c.en==="glass"){x.mult=r1(x.mult*2);popOn(el,"×2","xm");SFX.xmult();setCM(x);await sleep(220)}
   if(c.en==="lucky"){if(rnd()<.2){x.mult+=20;popOn(el,"幸运 +20 倍率","mult");SFX.mult(4);setCM(x);await sleep(220)}if(rnd()<1/15){G.gold+=20;popOn(el,"幸运 +20 金币","gold");SFX.coins();renderSide2();await sleep(220)}}
   if(c.seal==="press"&&x.beat){x.mult+=10;popOn(el,"压印 +10 倍率","mult");SFX.mult(3);setCM(x);await sleep(200)}
   if(c.seal==="coin"&&!rp){const gv=G.partners.includes("ckg")?6:3;G.gold+=gv;popOn(el,`+${gv} 金币`,"gold");SFX.coin();await sleep(180)}
+  for(const id of G.partners){const P=PARTNERS[id];if(P.card){x.self=G.pst[id]=(G.pst[id]||{});let t;try{t=P.card(x,c,G)}catch(e){}if(t){x.mult=r1(x.mult);popOn(el,t,popCls(t));partnerPulse(id);t.includes("×")?SFX.xmult():SFX.mult(2);setCM(x);await sleep(190)}}}
   }
+  if(typeof cardXP==="function")await cardXP(c,el,x);
   c.age=0;const n=1+(c.seal==="frog"?1:0)+G.partners.filter(id=>PARTNERS[id].poolX).length;for(let q=0;q<n;q++){const got=poolAdd(famOf(c));renderPool(true);for(const f of got){x.bursts++;applyBurst(f,x);SFX.burst();bgKick(.25);popOn($("#pool"),`${FAMS[f].n}消除：${FAMS[f].burst}`,"burst");renderSide2();setCM(x);await sleep(300);
    for(const id of G.partners){const P=PARTNERS[id];if(P.burst){x.self=G.pst[id]=(G.pst[id]||{});const t=P.burst(x,f,G);if(t){partnerPulse(id,t);SFX.mult(2);renderSide2();setCM(x);await sleep(220)}}}}}}
  for(const c of G.hand){if(c.en==="steel"){x.mult=r1(x.mult*1.5);const el=$(`#hand .card[data-id="${c.id}"]`);popOn(el,"钢 ×1.5","xm");SFX.xmult();setCM(x);await sleep(200)}for(const id of G.partners){const P=PARTNERS[id];if(P.held){x.self=G.pst[id]=(G.pst[id]||{});const t=P.held(x,c,G);if(t){const el=$(`#hand .card[data-id="${c.id}"]`);popOn(el,t,popCls(t));partnerPulse(id);setCM(x);await sleep(190)}}}}
  for(const id of G.partners){const P=PARTNERS[id];if(P.hand){x.self=G.pst[id]=(G.pst[id]||{});const t=P.hand(x,G);if(t){partnerPulse(id,t);t.includes("×")?SFX.xmult():SFX.mult(3);setCM(x);await sleep(260)}}}
  if(typeof extraHand==="function"){for(const t of (extraHand(x,G)||[])){popOn($("#setBar")||$("#partners"),t,popCls(t)+" big");t.includes("×")?SFX.xmult():SFX.mult(4);setCM(x);await sleep(320)}}
  if(B&&B.hand){const t=B.hand(x,G);if(t){toast(t);SFX.bad();setCM(x);await sleep(280)}}
- if(x.beat){const bx=x.beatX||1.5;x.mult=r1(x.mult*bx);SFX.beat();bigPop(`压住了！×${bx}`,"beat");bgKick(.4);foeSay(0);setCM(x);await sleep(460)}
+ if(x.beat){const bx=x.beatX||1.25;x.mult=r1(x.mult*bx);SFX.beat();bigPop(`压住了！×${bx}`,"beat");bgKick(.4);foeSay(0);setCM(x);await sleep(460)}
  else if(x.noMiss){bigPop("盾斗士顶住了","beat");setCM(x);await sleep(360)}
- else{const mx=B&&B.missX||G.eMiss||((G.diff||0)>=8?.5:.6);x.mult=Math.max(1,r1(x.mult*mx));SFX.bad();bigPop(`没压住 ×${mx}`,"miss");foeSay(1);setCM(x);await sleep(460)}
+ else{const mx=B&&B.missX||G.eMiss||((G.diff||0)>=8?.4:.5);x.mult=Math.max(1,r1(x.mult*mx));SFX.bad();bigPop(`没压住 ×${mx}`,"miss");foeSay(1);setCM(x);await sleep(460)}
  x.total=Math.floor(x.chips*x.mult);
  if(B&&B.after){const t=B.after(x,G);if(t)toast(t)}
  if(G.armor>0&&x.total>0){if(x.isBomb){toast("炸弹无视岩甲！")}else{const hit=x.beat?x.total*2:x.total;const ab=Math.min(G.armor,hit);G.armor-=ab;x.total=Math.max(0,Math.round(x.total-(x.beat?ab/2:ab)));toast(G.armor>0?`岩甲挡住了伤害（护甲还剩 ${G.armor.toLocaleString()}）`:"岩甲碎了！");renderUpper()}}
