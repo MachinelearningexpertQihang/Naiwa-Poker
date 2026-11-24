@@ -144,9 +144,9 @@ function extraHand(x,G){const out=[];const lv=x.lv,cs=x.cards||[];
 {const _sb3=startBlind;startBlind=function(){const r=_sb3.apply(this,arguments);try{G.discUsed=0}catch(e){}return r}}
 {const _ds=discardSel;discardSel=async function(){const n0=G?G.discLeft:0;const r=await _ds.apply(this,arguments);try{if(G&&G.discLeft<n0)G.discUsed=(G.discUsed||0)+1}catch(e){}return r}}
 // 套装栏：伙伴旁边显示每个流派凑了几个
-function renderSetBar(){let el=$("#setBar");if(!G||!$("#play.on, #shop.on")){if(el)el.style.display="none";return}if(!el){el=document.createElement("div");el.id="setBar";$("#stage").appendChild(el)}el.style.display="";
+function renderSetBar(){let el=$("#setBar");if(!G||!$("#play.on, #shop.on")){if(el)el.style.display="none";return}const sd=$("#side");if(!el){el=document.createElement("div");el.id="setBar"}if(sd&&el.parentNode!==sd)sd.appendChild(el);el.style.display="";const inShop=!!$("#shop.on");
  const n=setCounts(G);const ks=Object.keys(n).filter(t=>SETS[t]).sort((a,b)=>n[b]-n[a]);
- el.innerHTML=(ks.length?ks.slice(0,4).map(t=>`<button class="sb ${n[t]>=3?"on":""}" data-t="${t}"><b>${t}</b><i>${Math.min(3,n[t])}/3</i></button>`).join(""):`<span class="sbTip">凑 3 个同流派伙伴<br>激活套装</span>`)+(G.bombsN?`<span class="sbBomb">炸弹 ×${G.bombsN}</span>`:"");
+ el.innerHTML=(ks.length?ks.slice(0,4).map(t=>`<button class="sb ${n[t]>=3?"on":""}" data-t="${t}"><b>${t}</b><i>${Math.min(3,n[t])}/3</i></button>`).join(""):inShop?`<span class="sbTip">凑 3 个同流派伙伴，激活套装</span>`:"")+(G.bombsN?`<span class="sbBomb">炸弹 ×${G.bombsN}</span>`:"");
  el.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{SFX.click();toast(`<b>${b.dataset.t}套装</b>（${Math.min(3,n[b.dataset.t])}/3）：${SETS[b.dataset.t].d}`)})}
 {const _rp=renderPartners;renderPartners=function(){const r=_rp.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
 {const _sh=show;show=function(id){const r=_sh.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
@@ -192,3 +192,9 @@ async function dailyScreen(){SFX.click();const k=dailyKey(),R=dailyRule(k),day=d
  if(!L.length){el.innerHTML=`<p class="lbMsg">今天还没有人上榜。打一局，你就是第一名。</p>`;return}
  el.innerHTML=L.slice(0,30).map((r,i)=>{const s=+r.score%100000,far=Math.floor(s/1000),bt=s%1000;const nm=cleanName(r.nickname);const a=r.avatar?(String(r.avatar).indexOf("//")===0?"https:"+r.avatar:r.avatar):"";return`<div class="lbRow ${i<3?"top"+(i+1):""}"><b class="lbR">${i+1}</b><span class="lbAv">${a?`<img referrerpolicy="no-referrer" src="${a.replace(/"/g,"")}" onerror="this.remove()">`:nm.slice(0,1)}</span><span class="lbN">${nm}</span><b class="lbS">${far} <small>关</small>${bt?` · ${bt}k`:""}</b></div>`}).join("")}
 {const _ts=titleScreen;titleScreen=function(){_ts.apply(this,arguments);try{const b=document.createElement("button");b.className="btn tDaily";const k=dailyKey(),R=dailyRule(k);b.innerHTML=`每日挑战 <small>${R.n}${(M.dailyTry||{})[k]?" · 已挑战":""}</small>`;b.onclick=()=>{au();dailyScreen()};$("#title").appendChild(b)}catch(e){}}}
+
+// 左边栏重画后，把套装栏放回最下面
+{const _rs=renderSide;renderSide=function(){const r=_rs.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
+// 商店里的伙伴：标出买下以后这个流派凑到几个
+function ptSetTag(id){const P=PARTNERS[id];if(!SETS[P.t])return`${P.t}流`;const n=setCounts(G)[P.t]||0;if(n>=3)return`${P.t}流 · 套装已激活`;return n+1>=3?`${P.t}流 ${n+1}/3 · 买下激活套装`:`${P.t}流 ${n+1}/3`}
+{const _sr=shopRender;shopRender=function(){const r=_sr.apply(this,arguments);try{(G.shop.items||[]).forEach((it,i)=>{if(it.k!=="partner")return;const t=document.querySelector(`#shop .shItem.pt[data-i="${i}"] .ptTag`);if(!t)return;const n=(setCounts(G)[PARTNERS[it.id].t]||0);t.textContent=ptSetTag(it.id);t.classList.toggle("go",!!SETS[PARTNERS[it.id].t]&&n===2)})}catch(e){console.warn(e)}return r}}
