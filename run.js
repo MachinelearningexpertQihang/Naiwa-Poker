@@ -100,7 +100,8 @@ const HELP_P=["c7","sn","sna","msy","snb","dg","msb"];
   if(it&&pool.length&&!HELP_P.includes(it.id)){it.id=pick(pool);it.sold=0;shopRender()}}}catch(e){console.warn(e)}return r}}
 
 /* ---------- 6. 伙伴流派套装：同一个流派凑齐 3 个，套装生效 ---------- */
-const SETS={
+/* 1.6：套装先去掉（流派保留）。原来的套装效果留在 SETS_OFF 里，想恢复把下面一行改回 SETS=SETS_OFF 就行 */
+const SETS_OFF={
  "炸弹":{d:"炸弹按多一张算（四炸当五炸，五炸当六炸……）"},
  "连牌":{d:"顺子、三连对、钢板、同花顺 倍率 ×1.5"},
  "牌型":{d:"两对、三张、三带二 筹码 +60"},
@@ -117,6 +118,7 @@ const SETS={
  "成长":{d:"这一局每出过 5 手，倍率 +1"},
  "弃牌":{d:"这一关每弃过一次牌，倍率 +4"},
  "小牌":{d:"打出的牌全是 2～6：倍率 ×2"}};
+const SETS={};
 function setCounts(G){const n={};(G.partners||[]).forEach(id=>{const t=PARTNERS[id]&&PARTNERS[id].t;if(t)n[t]=(n[t]||0)+1});return n}
 const setOn=(G,t)=>!!SETS[t]&&(setCounts(G)[t]||0)>=3;
 function extraHand(x,G){const out=[];const lv=x.lv,cs=x.cards||[];
@@ -146,7 +148,7 @@ function extraHand(x,G){const out=[];const lv=x.lv,cs=x.cards||[];
 // 套装栏：伙伴旁边显示每个流派凑了几个
 function renderSetBar(){let el=$("#setBar");if(!G||!$("#play.on, #shop.on")){if(el)el.style.display="none";return}const sd=$("#side");if(!el){el=document.createElement("div");el.id="setBar"}if(sd&&el.parentNode!==sd)sd.appendChild(el);el.style.display="";const inShop=!!$("#shop.on");
  const n=setCounts(G);const ks=Object.keys(n).filter(t=>SETS[t]).sort((a,b)=>n[b]-n[a]);
- el.innerHTML=(ks.length?ks.slice(0,4).map(t=>`<button class="sb ${n[t]>=3?"on":""}" data-t="${t}"><b>${t}</b><i>${Math.min(3,n[t])}/3</i></button>`).join(""):inShop?`<span class="sbTip">凑 3 个同流派伙伴，激活套装</span>`:"")+(G.bombsN?`<span class="sbBomb">炸弹 ×${G.bombsN}</span>`:"");
+ el.innerHTML=(ks.length?ks.slice(0,4).map(t=>`<button class="sb ${n[t]>=3?"on":""}" data-t="${t}"><b>${t}</b><i>${Math.min(3,n[t])}/3</i></button>`).join(""):"")+(G.bombsN?`<span class="sbBomb">炸弹 ×${G.bombsN}</span>`:"");
  el.querySelectorAll(".sb").forEach(b=>b.onclick=()=>{SFX.click();toast(`<b>${b.dataset.t}套装</b>（${Math.min(3,n[b.dataset.t])}/3）：${SETS[b.dataset.t].d}`)})}
 {const _rp=renderPartners;renderPartners=function(){const r=_rp.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
 {const _sh=show;show=function(id){const r=_sh.apply(this,arguments);try{renderSetBar()}catch(e){}return r}}
