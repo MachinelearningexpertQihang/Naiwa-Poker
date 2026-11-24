@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="1.9";
+const VER="2.0";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -14,14 +14,13 @@ SFX.drop=SFX.slide;SFX.bigwin=SFX.win;
 /* ---------- 画面适配：1280×720 的舞台，按窗口缩放 ---------- */
 /* 屏幕适配（照奶蛙之塔）：用真正看得见的那块区域（visualViewport），避开刘海和圆角；竖着拿手机时整个转过来 */
 function safeIn(){let p=document.getElementById("safeProbe");if(!p){p=document.createElement("div");p.id="safeProbe";p.style.cssText="position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)";document.body.appendChild(p)}const c=getComputedStyle(p);return{t:parseFloat(c.paddingTop)||0,r:parseFloat(c.paddingRight)||0,b:parseFloat(c.paddingBottom)||0,l:parseFloat(c.paddingLeft)||0}}
-function fit(){const vv=window.visualViewport;let W=innerWidth,H=innerHeight,ox=0,oy=0;if(vv&&vv.width>0&&vv.height>0){W=Math.min(W,vv.width);H=Math.min(H,vv.height);ox=vv.offsetLeft||0;oy=vv.offsetTop||0}
- const de=document.documentElement;if(de.clientWidth>0)W=Math.min(W,de.clientWidth);if(de.clientHeight>0)H=Math.min(H,de.clientHeight);
- const st=$("#stage");if(!st)return;const port=H>W*1.05;let sf={t:0,r:0,b:0,l:0};try{sf=safeIn()}catch(e){}
- const aw=Math.max(100,W-sf.l-sf.r),ah=Math.max(100,H-sf.t-sf.b);st.style.left=(ox+sf.l+aw/2)+"px";st.style.top=(oy+sf.t+ah/2)+"px";
- const s=port?Math.min(aw/720,ah/1280):Math.min(aw/1280,ah/720);st.style.transform=port?`translate(-50%,-50%) rotate(90deg) scale(${s})`:`translate(-50%,-50%) scale(${s})`;
- document.body.classList.toggle("port",port);fit._k=innerWidth+"x"+innerHeight+(vv?"|"+vv.width+"x"+vv.height:"")}
+function fit(){/* 2.0：尺寸回到 1.0 —— 直接按窗口大小等比缩放、居中，不再扣刘海安全区（B站里画面会被缩小一圈） */
+ const st=$("#stage");if(!st)return;const W=innerWidth,H=innerHeight;const port=H>W*1.05;
+ st.style.left="50%";st.style.top="50%";
+ const s=port?Math.min(W/720,H/1280):Math.min(W/1280,H/720);st.style.transform=port?`translate(-50%,-50%) rotate(90deg) scale(${s})`:`translate(-50%,-50%) scale(${s})`;
+ document.body.classList.toggle("port",port);fit._k=W+"x"+H}
 function fitSoon(){[60,250,600,1200,2500].forEach(t=>setTimeout(fit,t))}
-setInterval(()=>{const vv=window.visualViewport;if(fit._k!==innerWidth+"x"+innerHeight+(vv?"|"+vv.width+"x"+vv.height:""))fit()},700);
+setInterval(()=>{if(fit._k!==innerWidth+"x"+innerHeight)fit()},700);
 if(window.visualViewport)visualViewport.addEventListener("resize",fit);addEventListener("orientationchange",fitSoon);
 addEventListener("load",()=>{try{if(window.toy&&toy.onContainerChange)toy.onContainerChange(()=>{fit();fitSoon()})}catch(e){}fitSoon()});
 /* 屏幕上的一块区域 → 舞台里的坐标（转过来的时候也算对） */
@@ -70,7 +69,8 @@ if(typeof HEROES!=="undefined"&&HEROES[hero]&&HEROES[hero].apply)HEROES[hero].ap
  blindSelect()}
 function targetOf(lvIdx,b){const d=G&&G.diff||0;return Math.round(LV_BASE[lvIdx]*BLINDS[b].m*(1+(d>=1?.15:0)+(d>=6?.2:0))/10)*10}
 function foeKey(lvIdx,b){if(b===2)return bossOf(lvIdx);const Z=ZONE_FOES[Math.min(lvIdx,ZONE_FOES.length-1)];const k=(G.foeSeed||0)+lvIdx*7,L=Z.length;return Z[(k+b*(1+k%(L-1)))%L]}
-function hdOf(lvIdx,b){const v=FOE_HD[foeKey(lvIdx,b)]||[0,0];const d=G.diff||0;return[Math.max(2,G.handsMax+v[0]-(d>=2&&b===2?1:0)),Math.max(0,G.discMax+v[1]-(d>=7?1:0))]}
+function bossCut(lvIdx,b){if(b!==2||lvIdx<2||!G)return 0;G.bossCut=G.bossCut||{};const k=(G.endless?(G.loop||1):0)+"_"+lvIdx;if(!G.bossCut[k])G.bossCut[k]=rnd()<.5?"h":"d";return G.bossCut[k]}
+function hdOf(lvIdx,b){const v=FOE_HD[foeKey(lvIdx,b)]||[0,0];const d=G.diff||0;const c=bossCut(lvIdx,b);return[Math.max(2,G.handsMax+v[0]-(d>=2&&b===2?1:0)-(c==="h"?1:0)),Math.max(0,G.discMax+v[1]-(d>=7?1:0)-(c==="d"?1:0))]}
 function bossOf(lvIdx){return STATION_BOSS[Math.min(lvIdx,STATION_BOSS.length-1)]}
 function foeOf(lvIdx,b){if(b===2){const k=bossOf(lvIdx),B=BOSSES[k];return{n:B.n,img:B.img,d:B.d,boss:1,say:B.say}}return FOES[foeKey(lvIdx,b)]}
 
@@ -79,7 +79,7 @@ function blindSelect(){show("blinds");const lv=lvNow();bgScene("lv",G.lvIdx);
  $("#blinds").innerHTML=`<div class="bsHead"><div class="bsTop"><span class="bsLoc">第 ${G.lvIdx+1} 站 · ${locOf(G.lvIdx).n}</span><span class="bsLine">${(LOC_LINE[G.lvIdx]||"").replace(/^[^。]*。/,"")}</span></div><h1>打 ${rankName(lv)}</h1><p>这一级 <b>${rankName(lv)}</b> 最大（比 A 还大），<b class="hred">红桃 ${rankName(lv)}</b> 是逢人配</p></div>
  <div class="bsRow">${BLINDS.map((B,i)=>{const boss=i===2?BOSSES[bossOf(G.lvIdx)]:null;return`<div class="bsCard ${boss?"boss":""} ${i===G.blind?"now":i<G.blind?"done":"later"}">
   <div class="bsName">${B.n}</div>${boss?`<img class="bsBoss" src="${IMG(boss.img)}"><b class="bsBn">${boss.n}</b><p class="bsBd">${boss.d}</p>`:(f=>`<img class="bsBoss" src="${IMG(f.img)}"><b class="bsBn">${f.n}</b><p class="bsBd">${f.d}</p>`)(foeOf(G.lvIdx,i))}
-  <div class="bsT">血量<b>${targetOf(G.lvIdx,i).toLocaleString()}</b></div><div class="bsHD">${(h=>`出牌 <b class="${h[0]>G.handsMax?"up":h[0]<G.handsMax?"dn":""}">${h[0]}</b> · 弃牌 <b class="${h[1]>G.discMax?"up":h[1]<G.discMax?"dn":""}">${h[1]}</b>`)(hdOf(G.lvIdx,i))}</div><div class="bsG">过关 +${B.gold} 金币</div>
+  <div class="bsT">血量<b>${targetOf(G.lvIdx,i).toLocaleString()}</b></div><div class="bsHD">${(h=>`出牌 <b class="${h[0]>G.handsMax?"up":h[0]<G.handsMax?"dn":""}">${h[0]}</b> · 弃牌 <b class="${h[1]>G.discMax?"up":h[1]<G.discMax?"dn":""}">${h[1]}</b>`)(hdOf(G.lvIdx,i))}</div>${(c=>c?`<div class="bsCut">首领压阵：${c==="h"?"出牌":"弃牌"} -1</div>`:"")(bossCut(G.lvIdx,i))}<div class="bsG">过关 +${B.gold} 金币</div>
   ${i===G.blind?`<button class="btn gold" id="bsGo">开打</button>`:i<G.blind?`<div class="bsDone">过了</div>`:`<div class="bsDone">　</div>`}</div>`}).join("")}</div>
  <div class="bsFoot"><span>金币 <b>${G.gold}</b></span><span>第 ${G.lvIdx+1} / ${LV_LIST.length} 级</span></div>`;
  $("#bsGo").onclick=()=>{SFX.click();startBlind()}}
@@ -135,7 +135,7 @@ function partnerTip(i,el){const id=G.partners[i],P=PARTNERS[id];SFX.click();tip(
 function renderUpper(){const u=G.upper,f=G.foe;const BB=G.boss&&BOSSES[G.boss];if(!u||!f){$("#upper").innerHTML="";return}const hp=Math.max(0,G.target-G.score);
  $("#upper").innerHTML=`<div class="foe ${f.boss?"boss":""}"><div class="foeImg"><img src="${IMG(f.img)}"><i class="foeSay"></i></div><div class="foeInfo"><b class="foeN">${f.boss?`<em>首领</em>`:""}${f.n}</b><div class="hpBar"><i style="width:${hp/G.target*100}%"></i><span>${hp.toLocaleString()}</span></div></div></div>
  <div class="upR"><div class="upLbl">它出了<b>${HANDS[u.j.type].n}</b><span class="upInt">${G.nextUp?`下一手：<b>${HANDS[G.nextUp.j.type].n}</b>`:BB&&BB.dyn?"下一手：<b>更大</b>":""}</span></div><div class="upCards">${u.cards.map((c,k)=>cardHTML(c,{cls:"mini up2"+(G.upFresh?" upIn":""),st:"--i:"+k})).join("")}</div>
- <div class="upMeta"><span class="upHint">压住 <b>×${(G.partners.includes("v_archer")?2:1.5)}</b> · 压不住 <b class="m">×${BB&&BB.missX||G.eMiss||((G.diff||0)>=8?.6:.75)}</b></span>${BB&&BB.line?`<span class="upPro">${BB.line(G)}</span>`:""}${INVERT?`<span class="upPro">倒转：越小越大</span>`:""}</div></div>`}
+ <div class="upMeta"><span class="upHint">压住 <b>×${(G.partners.includes("v_archer")?2:1.5)}</b> · 压不住 <b class="m">×${BB&&BB.missX||G.eMiss||((G.diff||0)>=8?.5:.6)}</b></span>${BB&&BB.line?`<span class="upPro">${BB.line(G)}</span>`:""}${INVERT?`<span class="upPro">倒转：越小越大</span>`:""}</div></div>`}
 function renderPool(fresh){G.upFresh=0;const P=G.pool||[];$("#pool").innerHTML=`<div class="plTop"><span>奶蛙池</span><span>同一家凑齐 3 只就消除</span></div><div class="plSlots">${[...Array(7)].map((_,i)=>{const t=P[i];return t==null?`<i class="tok e"></i>`:`<i class="tok ${fresh&&i===P.length-1?"new":""}" style="--fc:${FAMS[t].c}"><img src="${IMG(FAMS[t].img)}"></i>`}).join("")}</div>
  <div class="plFam">${FAMS.slice(0,4).map((F,i)=>`<span style="--fc:${F.c}"><i></i>${SUITS[i]}${F.n} ${F.burst}</span>`).join("")}</div>`}
 function renderDeck(){const n=G.draw.length;$("#deck").innerHTML=[0,1,2,3].slice(0,Math.max(1,Math.ceil(n/27))).map(k=>`<i style="--k:${k}"></i>`).join("")+`<b>${n} / ${G.deck.length}</b>`;$("#deck").onclick=deckView}
@@ -180,7 +180,7 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
  if(B&&B.hand){const t=B.hand(x,G);if(t){toast(t);SFX.bad();setCM(x);await sleep(280)}}
  if(x.beat){const bx=x.beatX||1.5;x.mult=r1(x.mult*bx);SFX.beat();bigPop(`压住了！×${bx}`,"beat");bgKick(.4);foeSay(0);setCM(x);await sleep(460)}
  else if(x.noMiss){bigPop("盾斗士顶住了","beat");setCM(x);await sleep(360)}
- else{const mx=B&&B.missX||G.eMiss||((G.diff||0)>=8?.6:.75);x.mult=Math.max(1,r1(x.mult*mx));SFX.bad();bigPop(`没压住 ×${mx}`,"miss");foeSay(1);setCM(x);await sleep(460)}
+ else{const mx=B&&B.missX||G.eMiss||((G.diff||0)>=8?.5:.6);x.mult=Math.max(1,r1(x.mult*mx));SFX.bad();bigPop(`没压住 ×${mx}`,"miss");foeSay(1);setCM(x);await sleep(460)}
  x.total=Math.floor(x.chips*x.mult);
  if(B&&B.after){const t=B.after(x,G);if(t)toast(t)}
  if(G.armor>0&&x.total>0){if(x.isBomb){toast("炸弹无视岩甲！")}else{const hit=x.beat?x.total*2:x.total;const ab=Math.min(G.armor,hit);G.armor-=ab;x.total=Math.max(0,Math.round(x.total-(x.beat?ab/2:ab)));toast(G.armor>0?`岩甲挡住了伤害（护甲还剩 ${G.armor.toLocaleString()}）`:"岩甲碎了！");renderUpper()}}
