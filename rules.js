@@ -12,6 +12,7 @@ const rankName=r=>RN[r]||String(r);
 const HANDS={
  single:{n:"单张",c:5,m:1},
  pair:{n:"对子",c:10,m:2},
+ twopair:{n:"两对",c:20,m:2},
  triple:{n:"三张",c:25,m:3},
  fullhouse:{n:"三带二",c:40,m:4},
  straight:{n:"顺子",c:35,m:4},
@@ -24,7 +25,7 @@ const HANDS={
  bomb7:{n:"七炸",c:180,m:18},
  bomb8:{n:"八炸",c:250,m:24},
  rocket:{n:"天王炸",c:400,m:40}};
-const HAND_ORDER=["single","pair","triple","fullhouse","straight","tube","plate","bomb4","bomb5","sflush","bomb6","bomb7","bomb8","rocket"];
+const HAND_ORDER=["single","pair","twopair","triple","fullhouse","straight","tube","plate","bomb4","bomb5","sflush","bomb6","bomb7","bomb8","rocket"];
 
 let NOWILD=false,INVERT=false;
 const isWild=(c,lv)=>!NOWILD&&c.s!==4&&(c.wild||(c.s===1&&c.r===lv));
@@ -64,6 +65,9 @@ function judge(cards,lv){
  // 同点数：对子、三张、炸弹
  if(ranks.length<=1){const r=ranks.length?ranks[0]:lv;const p=power(r,lv);
   if(n===2)push("pair",p);if(n===3)push("triple",p);if(n>=4&&n<=8)push("bomb"+n,p)}
+ // 两对：两个不同点数的对子（比如 55 + 99），逢人配可以补
+ if(n===4){const rs=ranks.filter(r=>(cnt[r]||0)>0);if(rs.length===2&&rs.every(r=>cnt[r]<=2)&&(4-plain.length)===wild){const p=rs.map(r=>power(r,lv)).sort((a,b)=>b-a);push("twopair",p[0]*20+p[1])}
+  else if(rs.length===1&&cnt[rs[0]]<=2&&wild===4-cnt[rs[0]]&&wild>=2){/* 一对 + 两张逢人配：当成和最大的牌凑两对，但四张一样就是炸弹，炸弹更大，交给 pickBest */}}
  // 三带二：只能带一对
  if(n===5){for(const t of (ranks.length?ranks:[lv])){for(const pr of [...ranks,null]){if(pr===t)continue;const needT=Math.max(0,3-(cnt[t]||0)),needP=pr==null?2:Math.max(0,2-(cnt[pr]||0));
    const extra=ranks.filter(r=>r!==t&&r!==pr).length;if(extra)continue;if((cnt[t]||0)>3||(pr!=null&&(cnt[pr]||0)>2))continue;if(needT+needP===wild){push("fullhouse",power(t,lv));break}}}}

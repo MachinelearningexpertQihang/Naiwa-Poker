@@ -20,7 +20,7 @@ const SEALS={frog:{n:"奶蛙印",d:"打出时，往奶蛙池多放一只奶蛙"}
    hand(ctx)：整手牌算分时；card(ctx,c)：每张牌计分时；held(ctx,c)：每张留在手里的牌；after(ctx)：这手算完以后；end()：过关时 */
 const PARTNERS={
  nw:{t:"基础",n:"奶蛙",img:"nw",r:"C",p:4,d:"每一手 倍率 +4",hand:x=>{x.mult+=4;return"+4 倍率"}},
- dg:{t:"对子",n:"奶狗",img:"dg",r:"C",p:4,d:"打出对子时 筹码 +40",hand:x=>{if(x.type==="pair"){x.chips+=40;return"+40 筹码"}}},
+ dg:{t:"对子",n:"奶狗",img:"dg",r:"C",p:4,d:"打出对子或两对时 筹码 +40",hand:x=>{if(x.type==="pair"||x.type==="twopair"){x.chips+=40;return"+40 筹码"}}},
  eg:{t:"基础",n:"奶蛋",img:"eg",r:"C",p:5,d:"每一关第一手，倍率 ×2",hand:x=>{if(x.first){x.mult*=2;return"×2 倍率"}}},
  c7:{t:"三张",n:"冰封奶蛙王",img:"c7",r:"C",p:5,d:"三张、三带二、钢板 倍率 +8",hand:x=>{if(["triple","fullhouse","plate"].includes(x.type)){x.mult+=8;return"+8 倍率"}}},
  v_ablue:{t:"经济",n:"阿蓝",img:"v_ablue",r:"C",p:4,d:"过关时多拿 4 金币",end:()=>4},
@@ -55,7 +55,7 @@ Object.assign(PARTNERS,{
  v_bishop:{t:"级牌",n:"骸骨主教",img:"v_bishop",r:"R",p:6,d:"打出的牌里有级牌：倍率 ×1.5",hand:x=>{if(x.cards.some(c=>c.r===x.lv&&c.s<4)){x.mult*=1.5;return"×1.5 倍率"}}},
  timefrog:{t:"级牌",n:"时之奶蛙",img:"timefrog",r:"C",p:5,d:"过关时，手里每张级牌 +2 金币",end:G=>G.hand.filter(c=>c.r===LV_LIST[G.lvIdx]&&c.s<4).length*2},
  /* 逢人配流：把牌变成万能牌 */
- xsw:{t:"逢人配",n:"雾里的白奶蛙",img:"xsw",r:"R",p:7,d:"每关第一手：打出的牌里随机 1 张永久变成逢人配",hand:x=>{if(x.first){const c=x.cards.filter(c=>c.s<4&&!c.wild);if(c.length){c[Math.floor(Math.random()*c.length)].wild=1;return"变出一张逢人配"}}}},
+ xsw:{t:"逢人配",n:"雾里的白奶蛙",img:"xsw",r:"R",p:7,d:"每关第一手：打出的牌里随机 1 张永久变成逢人配",hand:x=>{if(x.first){const c=x.cards.filter(c=>c.s<4&&!c.wild);if(c.length){c[Math.floor(rnd()*c.length)].wild=1;return"变出一张逢人配"}}}},
  fask:{t:"逢人配",n:"没有颜色的奶蛙",img:"fask",r:"C",p:5,d:"每张逢人配计分时 倍率 +5",card:(x,c)=>{if(isWild(c,x.lv)){x.mult+=5;return"+5 倍率"}}},
  yjx:{t:"逢人配",n:"异世界奶蛙",img:"yjx",r:"E",p:8,d:"手里每留着 1 张逢人配，倍率 ×1.5",held:(x,c)=>{if(isWild(c,x.lv)){x.mult*=1.5;return"×1.5 倍率"}}},
  m4:{t:"逢人配",n:"换牌的旅人",img:"m4",r:"C",p:4,d:"打出的牌里每有 1 张逢人配，筹码 +40",hand:x=>{const n=x.cards.filter(c=>isWild(c,x.lv)).length;if(n){x.chips+=40*n;return`+${40*n} 筹码`}}},
@@ -93,8 +93,8 @@ Object.assign(PARTNERS,{
  m2:{t:"品质",n:"铁匠奶蛙",img:"m2",r:"C",p:4,d:"闪卡计分时 筹码再 +50",card:(x,c)=>{if(c.ed==="foil"){x.chips+=50;return"+50"}}},
  /* 经济 / 弃牌 / 小牌 / 成长 */
  egq:{t:"经济",n:"存钱蛋",img:"egq",r:"C",p:5,d:"利息上限从 5 变成 10"},
- gb:{t:"经济",n:"礼物盒奶蛙",img:"gb",r:"R",p:6,d:"过关时，随机一个牌型升 1 级",end:G=>{const k=Object.keys(TEA);const t=k[Math.floor(Math.random()*k.length)];G.hl[t]=(G.hl[t]||0)+1;return 0}},
- m3:{t:"经济",n:"赌徒奶蛙",img:"m3",r:"C",p:4,d:"倍率随机 ×1 ～ ×3",hand:x=>{const m=[1,1.5,2,2.5,3][Math.floor(Math.random()*5)];x.mult*=m;return`×${m} 倍率`}},
+ gb:{t:"经济",n:"礼物盒奶蛙",img:"gb",r:"R",p:6,d:"过关时，随机一个牌型升 1 级",end:G=>{const k=Object.keys(TEA);const t=k[Math.floor(rnd()*k.length)];G.hl[t]=(G.hl[t]||0)+1;return 0}},
+ m3:{t:"经济",n:"赌徒奶蛙",img:"m3",r:"C",p:4,d:"倍率随机 ×1 ～ ×3",hand:x=>{const m=[1,1.5,2,2.5,3][Math.floor(rnd()*5)];x.mult*=m;return`×${m} 倍率`}},
  msx:{t:"弃牌",n:"村里的信使",img:"msx",r:"C",p:4,d:"弃牌时，每弃 1 张 +1 金币",disc:(cs,G)=>{G.gold+=cs.length;return`+${cs.length} 金币`}},
  dv:{t:"弃牌",n:"缝里的小恶魔",img:"dv",r:"R",p:6,d:"每弃掉 1 张牌，自己永久 倍率 +1（现在 +{v}）",disc:(cs,G,P)=>{P.v=(P.v||0)+cs.length;return`+${cs.length}`},hand:x=>{if(x.self.v){x.mult+=x.self.v;return`+${x.self.v} 倍率`}}},
  v_cup:{t:"小牌",n:"迷你奶茶杯",img:"v_cup",r:"C",p:4,d:"出单张：倍率 +20",hand:x=>{if(x.type==="single"){x.mult+=20;return"+20 倍率"}}},
@@ -111,13 +111,13 @@ const BOSSES={
  pp:{n:"泥巴奶屎",img:"pp",d:"每一手之前，随机 2 张手牌被泥巴糊住，这一手出不了",say:["呕——泥巴不够了","糊你一脸！","化成泥了……"],
   turn:G=>{G.hand.forEach(c=>c.mud=0);shuffleArr(hand0(G)).slice(0,2).forEach(c=>c.mud=1)}},
  xsh:{n:"影子刺客",img:"xsh",d:"迷雾：新抓的牌有三分之一背面朝上。点一下才能翻开看，翻开的牌这一手不能出",say:["被看穿了？","你看不清我","雾……散了"],
-  draw:(G,cs)=>{cs.forEach(c=>{if(Math.random()<.34)c.hid=1})}},
+  draw:(G,cs)=>{cs.forEach(c=>{if(rnd()<.34)c.hid=1})}},
  v_bfallen:{n:"堕天奶蛙",img:"v_bfallen",d:"抗贡：开局拿走你手里最大的 2 张牌，之后每一手前再拿走 1 张",say:["还我！","这张归我了","翅膀……断了"],
   start:G=>{for(let i=0;i<2;i++)bossTake(G)},turn:G=>{if(!G.first)bossTake(G)}},
  vp:{n:"月夜伯爵",img:"vp",d:"吸血：每一手的伤害被它吸走 25%",say:["我的血……","嗯，美味","月亮……落了"],
   after:x=>{const t=Math.floor(x.total*.25);x.total-=t;return t?`伯爵吸走了 ${t} 点伤害`:""}},
  dghw:{n:"古堡女巫",img:"dghw",d:"花色诅咒：每一手之前诅咒一种花色，这种花色的牌不计分",say:["咯咯？","这个花色是我的了","我的扫帚呢……"],
-  turn:G=>{G.curseSuit=Math.floor(Math.random()*4)},skip:(c,G)=>c.s===G.curseSuit&&!isWild(c,lvNow()),line:G=>`诅咒：<b class="hred">${SUITS[G.curseSuit]}</b> 不计分`},
+  turn:G=>{G.curseSuit=Math.floor(rnd()*4)},skip:(c,G)=>c.s===G.curseSuit&&!isWild(c,lvNow()),line:G=>`诅咒：<b class="hred">${SUITS[G.curseSuit]}</b> 不计分`},
  xch:{n:"冰原血兽",img:"xch",d:"冰冻：开局冻住 2 张手牌，之后每一手再冻 1 张。冻住的牌 2 手以后才化开",say:["吼？！","冻住你！","好冷……"],
   start:G=>{shuffleArr(hand0(G)).slice(0,2).forEach(c=>c.frz=3)},turn:G=>{G.hand.forEach(c=>{if(c.frz)c.frz--});if(!G.first)shuffleArr(hand0(G)).slice(0,1).forEach(c=>c.frz=2)}},
  v_snowk2:{n:"雪球大王",img:"v_snowk2",d:"越滚越大：每被你压住一次，它下一手就大一档。没压住伤害只剩一半",say:["不可能！","滚起来！","化……了"],dyn:1,missX:.5,
@@ -131,7 +131,7 @@ const BOSSES={
  snf:{n:"星蛇",img:"snf",d:"倒转：这一关同牌型比大小时，越小越大（3 最大）。炸弹照常",say:["嘶？","星星倒过来了","嘶……回家了"],
   start:G=>{G.invert=1}},
  v_curser:{n:"灭却诅咒师",img:"v_curser",d:"预言：每一手之前预言一个牌型。你出了这个牌型，伤害只剩 1/4",say:["预言……错了？","应验了","终于……可以停下了"],
-  turn:G=>{const pool=["single","pair","triple","fullhouse","straight","tube"];G.prophecy=pool[Math.floor(Math.random()*pool.length)]},
+  turn:G=>{const pool=["single","pair","triple","fullhouse","straight","tube"];G.prophecy=pool[Math.floor(rnd()*pool.length)]},
   hand:(x,G)=>{if(G.prophecy&&x.type===G.prophecy){x.mult=Math.max(1,x.mult/4);return"预言应验：伤害只剩 1/4"}},line:G=>`预言：<b class="hred">${HANDS[G.prophecy].n}</b>`},
  bx:{n:"奶蛙大魔王",img:"bx",d:"第一形态：只出炸弹，每一手掀桌清空奶蛙池。打倒它之后……",say:["有点意思","压不住吧","……还没完"],final:1,
   bombs:["bomb4","bomb4","bomb5"],post:G=>{if(G.pool.length){G.pool=[];return"大魔王掀桌：奶蛙池清空了"}return""}},
@@ -142,14 +142,14 @@ function cardName(c){return c.s===4?(c.r===17?"大王":"小王"):SUITS[c.s]+rank
 function bossTake(G){const h=hand0(G).filter(c=>c.s<4);if(!h.length)return;const lv=lvNow();h.sort((a,b)=>power(b.r,lv)-power(a.r,lv));const c=h[0];G.hand.splice(G.hand.indexOf(c),1);(G.taken=G.taken||[]).push(c);toast(`堕天奶蛙抗贡：拿走了你的 ${cardName(c)}`)}
 
 /* 茶包：升级牌型（每一级加的筹码、倍率） */
-const TEA={single:[10,1],pair:[15,1],triple:[20,2],fullhouse:[25,2],straight:[30,3],tube:[30,3],plate:[35,3],bomb:[40,4],sflush:[40,4],rocket:[60,6]};
+const TEA={single:[10,1],pair:[15,1],twopair:[20,1],triple:[20,2],fullhouse:[25,2],straight:[30,3],tube:[30,3],plate:[35,3],bomb:[40,4],sflush:[40,4],rocket:[60,6]};
 const teaKey=t=>/^bomb/.test(t)?"bomb":t;
 
 /* 每一级（打 2 ～ 打 A）的基础血量 */
 const LV_LIST=[2,3,4,5,6,7,8,9,10,11,12,13,14];
 const LV_BASE=[250,450,800,1400,2300,3600,5400,8000,11500,16000,22000,30000,40000];
 const BLINDS=[{n:"小关",m:1,gold:3},{n:"大关",m:1.5,gold:4},{n:"首领关",m:2,gold:5}];
-function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor((typeof rnd==="function"?rnd():rnd())*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
 /* 对手（小关、大关坐在对面的奶蛙）。like：它爱出的牌型；say：被压住 / 压住你 / 被打倒时说的话 */
 const FOES={
@@ -215,7 +215,7 @@ Object.assign(PARTNERS,{
  c4:{t:"符咒",n:"沉思紫蛙",img:"c4",r:"R",p:6,d:"每用一张符咒或秘宝，自己永久 倍率 +3（现在 +{v}）",onCons:(P)=>{P.v=(P.v||0)+3},hand:x=>{if(x.self.v){x.mult+=x.self.v;return`+${x.self.v} 倍率`}}},
  fj:{t:"符咒",n:"思考者",img:"fj",r:"C",p:4,d:"过关时，符咒栏每空一格 +2 金币",end:G=>(2-(G.cons||[]).length)*2},
  v_mhood:{t:"符咒",n:"兜帽人",img:"v_mhood",r:"R",p:6,d:"每用一张秘宝 +8 金币",onCons:(P,k,G)=>{if(MB[k])G.gold+=8}},
- pot:{t:"符咒",n:"奶茶壶奶蛙",img:"pot",r:"C",p:5,d:"每用一张符咒，有一半几率随机升级一个牌型",onCons:(P,k,G)=>{if(Math.random()<.5){const t=Object.keys(TEA);const z=t[Math.floor(Math.random()*t.length)];G.hl[z]=(G.hl[z]||0)+1;setTimeout(()=>toast(`奶茶壶：${z==="bomb"?"炸弹":HANDS[z].n} 升级了`),600)}}},
+ pot:{t:"符咒",n:"奶茶壶奶蛙",img:"pot",r:"C",p:5,d:"每用一张符咒，有一半几率随机升级一个牌型",onCons:(P,k,G)=>{if(rnd()<.5){const t=Object.keys(TEA);const z=t[Math.floor(rnd()*t.length)];G.hl[z]=(G.hl[z]||0)+1;setTimeout(()=>toast(`奶茶壶：${z==="bomb"?"炸弹":HANDS[z].n} 升级了`),600)}}},
  /* 增强流 */
  cki:{t:"增强",n:"青花瓷奶鸡",img:"cki",r:"R",p:7,d:"每碎掉一张玻璃牌，倍率 ×0.25 永久加成（现在 ×{v}）",hand:(x,G)=>{const v=1+.25*(G.glassBroken||0);x.self.v=v;if(v>1){x.mult*=v;return`×${v} 倍率`}}},
  ckb:{t:"增强",n:"铁皮乌鸡",img:"ckb",r:"C",p:5,d:"手里每张钢牌，倍率再 +6",held:(x,c)=>{if(c.en==="steel"){x.mult+=6;return"+6 倍率"}}},
@@ -248,16 +248,16 @@ Object.assign(PARTNERS,{
  /* 级牌 / 逢人配 */
  n2:{t:"逢人配",n:"害羞奶蛙",img:"n2",r:"C",p:4,d:"逢人配计分时 筹码 +50",card:(x,c)=>{if(isWild(c,x.lv)){x.chips+=50;return"+50"}}},
  xs:{t:"级牌",n:"胖奶蛙",img:"xs",r:"R",p:6,d:"打出的牌里同时有级牌和逢人配：倍率 ×2",hand:x=>{if(x.cards.some(c=>c.r===x.lv&&!isWild(c,x.lv)&&c.s<4)&&x.cards.some(c=>isWild(c,x.lv))){x.mult*=2;return"×2 倍率"}}},
- snn:{t:"成长",n:"深蓝奶蛇",img:"snn",r:"R",p:6,d:"每关第一手如果是单张，就复制这张牌放进牌组",hand:(x,G)=>{if(x.first&&x.type==="single"){const c={...x.cards[0],id:1e6+Math.floor(Math.random()*1e9)};G.deck.push(c);return"复制了一张"}}},
+ snn:{t:"成长",n:"深蓝奶蛇",img:"snn",r:"R",p:6,d:"每关第一手如果是单张，就复制这张牌放进牌组",hand:(x,G)=>{if(x.first&&x.type==="single"){const c={...x.cards[0],id:1e6+Math.floor(rnd()*1e9)};G.deck.push(c);return"复制了一张"}}},
  /* 炸弹 */
  hrw:{t:"炸弹",n:"白马",img:"hrw",r:"C",p:4,d:"打出五炸以上 +4 金币",hand:(x,G)=>{if(bombN(x.type)>=5){G.gold+=4;return"+4 金币"}}},
  xc:{t:"炸弹",n:"蹲蹲奶蛙",img:"xc",r:"C",p:5,d:"炸弹里每有一张逢人配，倍率 +10",hand:x=>{if(x.isBomb){const n=x.cards.filter(c=>isWild(c,x.lv)).length;if(n){x.mult+=10*n;return`+${10*n} 倍率`}}}},
- v_bdragon:{t:"炸弹",n:"龙蛙祭坛",img:"v_bdragon",r:"E",p:9,d:"打出炸弹后，随机一张手牌变成和炸弹一样的点数",hand:(x,G)=>{if(x.isBomb){const r=(x.cards.find(c=>c.s<4&&!isWild(c,x.lv))||{}).r;const h=G.hand.filter(c=>c.s<4&&c.r!==r&&!isWild(c,x.lv));if(r&&h.length){h[Math.floor(Math.random()*h.length)].r=r;return"手里多了一张同点数的牌"}}}},
+ v_bdragon:{t:"炸弹",n:"龙蛙祭坛",img:"v_bdragon",r:"E",p:9,d:"打出炸弹后，随机一张手牌变成和炸弹一样的点数",hand:(x,G)=>{if(x.isBomb){const r=(x.cards.find(c=>c.s<4&&!isWild(c,x.lv))||{}).r;const h=G.hand.filter(c=>c.s<4&&c.r!==r&&!isWild(c,x.lv));if(r&&h.length){h[Math.floor(rnd()*h.length)].r=r;return"手里多了一张同点数的牌"}}}},
  xcs:{t:"炸弹",n:"癞蛤蟆",img:"xcs",r:"C",p:4,d:"四炸 倍率 +12",hand:x=>{if(x.type==="bomb4"){x.mult+=12;return"+12 倍率"}}},
  /* 牌型 */
  sn:{t:"牌型",n:"黄奶蛇",img:"sn",r:"C",p:4,d:"三带二 筹码 +50",hand:x=>{if(x.type==="fullhouse"){x.chips+=50;return"+50 筹码"}}},
  sna:{t:"牌型",n:"绿奶蛇",img:"sna",r:"C",p:4,d:"三张 筹码 +40",hand:x=>{if(x.type==="triple"){x.chips+=40;return"+40 筹码"}}},
- msb:{t:"牌型",n:"奶牛鼠",img:"msb",r:"C",p:4,d:"对子 倍率 +6",hand:x=>{if(x.type==="pair"){x.mult+=6;return"+6 倍率"}}},
+ msb:{t:"牌型",n:"奶牛鼠",img:"msb",r:"C",p:4,d:"对子、两对 倍率 +6",hand:x=>{if(x.type==="pair"||x.type==="twopair"){x.mult+=6;return"+6 倍率"}}},
  msg:{t:"牌型",n:"灰奶鼠",img:"msg",r:"C",p:4,d:"单张 筹码 +40",hand:x=>{if(x.type==="single"){x.chips+=40;return"+40 筹码"}}},
  msy:{t:"牌型",n:"橙奶鼠",img:"msy",r:"C",p:4,d:"顺子 倍率 +8",hand:x=>{if(x.type==="straight"){x.mult+=8;return"+8 倍率"}}},
  snt:{t:"牌型",n:"青奶蛇",img:"snt",r:"C",p:4,d:"三连对 筹码 +60",hand:x=>{if(x.type==="tube"){x.chips+=60;return"+60 筹码"}}},
@@ -272,5 +272,5 @@ Object.assign(PARTNERS,{
  fhsk:{t:"弃牌",n:"做鬼脸的奶蛙",img:"fhsk",r:"C",p:4,d:"每弃一次牌，下一手 倍率 +3（出完清零，现在 +{v}）",disc:(cs,G,P)=>{P.v=(P.v||0)+3;return`+3`},hand:x=>{const v=x.self.v||0;x.self.v=0;if(v){x.mult+=v;return`+${v} 倍率`}}},
  fbsk:{t:"弃牌",n:"吃手手",img:"fbsk",r:"C",p:4,d:"弃掉的牌里每有一对，+2 金币",disc:(cs,G)=>{const n={};cs.forEach(c=>n[c.r]=(n[c.r]||0)+1);const k=Object.values(n).reduce((a,b)=>a+Math.floor(b/2),0);if(k){G.gold+=2*k;return`+${2*k} 金币`}}},
  ppt:{t:"弃牌",n:"奶油冰淇淋",img:"ppt",r:"C",p:4,d:"每关开始时 弃牌 +1",start:G=>{G.discLeft++}},
- v_proto:{t:"成长",n:"残破的初号机",img:"v_proto",r:"L",p:12,d:"每关第一手打出的牌，全部复制一份放进牌组",hand:(x,G)=>{if(x.first){x.cards.forEach(c=>G.deck.push({...c,id:1e6+Math.floor(Math.random()*1e9)}));return`复制了 ${x.cards.length} 张`}}},
+ v_proto:{t:"成长",n:"残破的初号机",img:"v_proto",r:"L",p:12,d:"每关第一手打出的牌，全部复制一份放进牌组",hand:(x,G)=>{if(x.first){x.cards.forEach(c=>G.deck.push({...c,id:1e6+Math.floor(rnd()*1e9)}));return`复制了 ${x.cards.length} 张`}}},
  v_twin_black:{t:"压牌",n:"无尽恶魔·蚀",img:"v_twin_black",r:"L",p:12,d:"没压住时，伤害反而 ×2",hand:x=>{if(!x.beat){x.noMiss=1;x.mult*=2;return"没压住 ×2"}}}});

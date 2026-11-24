@@ -32,7 +32,7 @@ const TUT=[
 const TU={on:false,i:0};
 function tutStart(){TU.on=true;TU.i=0;tutShow()}
 function tutEnd(){TU.on=false;const c=$("#coach");if(c)c.remove();lsSet("tutDone",1)}
-function stageRect(el){const r=el.getBoundingClientRect(),st=$("#stage").getBoundingClientRect(),s=st.width/1280;return{x:(r.left-st.left)/s,y:(r.top-st.top)/s,w:r.width/s,h:r.height/s}}
+function stageRect(el){return toStage(el.getBoundingClientRect())}
 function tutShow(){const S=TUT[TU.i];let c=$("#coach");if(!c){c=document.createElement("div");c.id="coach";$("#stage").appendChild(c)}
  const el=S.el.split(",").map(s=>$(s)).find(e=>e&&e.offsetParent);const R=el?stageRect(el):{x:640,y:360,w:0,h:0};const pad=8;
  c.className=S.wait?"act":"";

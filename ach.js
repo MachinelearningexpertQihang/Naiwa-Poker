@@ -6,7 +6,7 @@ M.cnt=Object.assign({fu:0,mb:0,trib:0},M.cnt||{});
 const addTo=(k,v)=>{if(!M[k].includes(v)){M[k].push(v);saveMeta();return true}return false};
 
 /* ---------- 首领进贡：打败首领后，它献上 3 张带它特色的牌，挑 1 张 ---------- */
-const rr=()=>2+Math.floor(Math.random()*13),rs=()=>Math.floor(Math.random()*4);
+const rr=()=>2+Math.floor(rnd()*13),rs=()=>Math.floor(rnd()*4);
 const TRIB={
  pp:  {d:"守护印：不怕泥巴、冰冻、烧牌",mk:()=>({s:rs(),r:rr(),seal:"guard"})},
  vp:  {d:"红桃 + 回响印：计分两次",mk:()=>({s:1,r:rr(),seal:"echo"})},
@@ -22,7 +22,7 @@ const TRIB={
  v_curser:{d:"彩卡 + 压印",mk:()=>({s:rs(),r:rr(),ed:"poly",seal:"press"})},
  bx:  {d:"阿岳的私藏",mk:i=>i===0?{s:4,r:17,ed:"poly"}:i===1?{s:rs(),r:14,ed:"poly",en:"glass"}:{s:rs(),r:rr(),seal:"echo",ed:"foil"}}};
 function tribCards(k){const T=TRIB[k]||TRIB[pick(Object.keys(TRIB))];const seen=new Set();
- return[0,1,2].map(i=>{let c;for(let t=0;t<9;t++){c=T.mk(i);if(!seen.has(c.s+"-"+c.r))break}seen.add(c.s+"-"+c.r);return Object.assign({id:1e5+Math.floor(Math.random()*1e9),ed:null,seal:null},c)})}
+ return[0,1,2].map(i=>{let c;for(let t=0;t<9;t++){c=T.mk(i);if(!seen.has(c.s+"-"+c.r))break}seen.add(c.s+"-"+c.r);return Object.assign({id:1e5+Math.floor(rnd()*1e9),ed:null,seal:null},c)})}
 function tribute(k){return new Promise(res=>{k=k==="bx2"?"bx":k;const B=BOSSES[k]||{n:"首领",img:"pp"};const T=TRIB[k]||{d:""};const cs=tribCards(k);
  ov(`<div class="box packBox tribBox"><div class="trHead"><img src="${IMG(B.img)}"><div><h2>${B.n} 进贡</h2><p>它服气了，献上三张牌。挑一张收进牌组。<br><em>${T.d}</em></p></div></div>
   <div class="pkRow">${cs.map((c,i)=>`<div class="flip" data-i="${i}" style="--i:${i}"><div class="fIn"><div class="fBack"><b>贡</b></div><div class="fFront">${cardHTML(c)}</div></div></div>`).join("")}</div><button class="btn dark" id="trSkip">都不要</button></div>`);

@@ -710,3 +710,33 @@ button{font-family:var(--px);cursor:pointer;border:0}
 .skipTag small{font-size:10px;opacity:.85}.skipTag b{font-size:15px;line-height:1.2}.skipTag em{font-style:normal;font-size:10px;line-height:1.3;opacity:.95}
 .bsBtns{display:flex;gap:10px;justify-content:center;align-items:center}
 #bsSkip{font-size:18px;padding:8px 16px}
+/* ---------- 每张牌都有奶蛙 ---------- */
+.cFrog{position:absolute;left:14%;right:14%;top:13%;bottom:12%;z-index:1;display:flex;align-items:flex-end;justify-content:center;background:radial-gradient(closest-side at 50% 62%,color-mix(in srgb,var(--fc) 40%,#fff) 0 35%,transparent 100%)}
+.cFrog img{width:100%;height:100%;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 2px 1px rgba(0,0,0,.22))}
+.cFrog img.fl,.cCourt img.fl{transform:scaleX(-1)}
+.cPips.side{left:0!important;right:0!important;top:14px!important;bottom:14px!important;z-index:2;display:block!important}
+.cPips.side i{width:17%!important;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1px #fff)}
+.card.nm .cOne{display:none!important}
+.cAce{inset:16px 12px!important}
+.cAceS{position:absolute;inset:4% 6%;display:flex;align-items:center;justify-content:center;opacity:.2}
+.cAceS .big{width:100%;height:100%;filter:none}
+.cAce img{position:relative!important;width:84%!important;height:84%;bottom:auto!important;right:auto!important;object-fit:contain;filter:drop-shadow(0 2px 1px rgba(0,0,0,.25))!important}
+.card.mini .cPips.side i,.card.mt .cPips.side i{width:15%!important}
+/* ---------- 伙伴流派套装栏（左侧面板下方） ---------- */
+#setBar{position:absolute;left:30px;top:566px;width:232px;z-index:6;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start}
+#setBar .sb{flex:1 1 calc(50% - 6px);display:flex;justify-content:space-between;align-items:center;background:rgba(29,20,24,.85);border:0;border-radius:7px;padding:5px 8px;color:#cdbba0;font-family:inherit;font-size:14px;cursor:pointer;box-shadow:inset 0 0 0 2px #4a3c30}
+#setBar .sb i{font-style:normal;font-size:12px;opacity:.8}
+#setBar .sb.on{background:linear-gradient(#ffd76a,#e0a422);color:#3a2000;box-shadow:inset 0 0 0 2px #fff3c0,0 0 10px rgba(255,200,60,.6)}
+#setBar .sbTip{font-size:12px;color:#8a7a66;line-height:1.4;padding:4px 2px}
+#setBar .sbBomb{flex:1 1 100%;text-align:center;font-size:13px;color:#ff8a5a;background:rgba(29,20,24,.85);border-radius:7px;padding:4px}
+.tipSet{margin:6px 0 0;font-size:12px;color:#cdbba0}.tipSet.on{color:#ffd76a}
+.dyBox{width:760px}
+.dyBox h2 small{font-size:18px;color:#cdbba0;margin-left:8px}
+.dyRule{background:linear-gradient(135deg,#c23b2e,#8a1f18);border-radius:10px;padding:12px 18px;margin:6px 0 12px;text-align:left;box-shadow:inset 0 0 0 2px #ffd76a}
+.dyRule b{font-size:26px;color:#fff6e0}.dyRule p{margin:4px 0;font-size:17px;color:#fff}.dyRule small{font-size:13px;color:#ffd9c0}
+.dyMe{font-size:16px;color:#cdbba0;margin-bottom:8px}.dyMe b{color:#ffd76a}
+.dyBox .lbList{max-height:220px;margin-bottom:12px}
+.tDaily{position:absolute;left:22px;top:90px;font-size:22px;background:linear-gradient(#ff6a5a,#c23b2e)!important;color:#fff!important}
+.tDaily small{display:block;font-size:13px;opacity:.9}
+.tPlay{position:absolute;left:22px;bottom:56px;font-size:15px;color:#cdbba0;opacity:.85}
+body.port{background:#0a0508}

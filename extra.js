@@ -28,7 +28,7 @@ function hintNext(){if(!G||G.busy)return;SFX.click();if(!G.hints||G.hintHand!==G
  toast(`${h.bt?"能压住：":"压不住，但能出："}<b>${HANDS[h.j.type].n}</b>（${G.hintI}/${G.hints.length}）`)}
 
 /* ---------- 牌型表：例子 + 谁压谁 ---------- */
-const HAND_EX={single:"5",pair:"8 8",triple:"J J J",fullhouse:"9 9 9 + 4 4",straight:"3 4 5 6 7",tube:"5 5 6 6 7 7",plate:"8 8 8 9 9 9",bomb4:"7 7 7 7",bomb5:"Q×5",sflush:"同花色 3 4 5 6 7",bomb6:"K×6",bomb7:"A×7",bomb8:"2×8",rocket:"小王 小王 大王 大王"};
+const HAND_EX={single:"5",pair:"8 8",twopair:"5 5 + 9 9",triple:"J J J",fullhouse:"9 9 9 + 4 4",straight:"3 4 5 6 7",tube:"5 5 6 6 7 7",plate:"8 8 8 9 9 9",bomb4:"7 7 7 7",bomb5:"Q×5",sflush:"同花色 3 4 5 6 7",bomb6:"K×6",bomb7:"A×7",bomb8:"2×8",rocket:"小王 小王 大王 大王"};
 handTable=function(){SFX.click();const lv=G?LV_LIST[G.lvIdx]:2;
  ov(`<div class="box htBox"><h2>牌型</h2><div class="htWrap"><table><tr class="hd"><td>牌型</td><td>例子</td><td>等级</td><td class="c">筹码</td><td></td><td class="m">倍率</td></tr>${HAND_ORDER.map(t=>{const b=G?handBase(t):{c:HANDS[t].c,m:HANDS[t].m,L:0};return`<tr class="${/^bomb|rocket|sflush/.test(t)?"bm":""}"><td>${HANDS[t].n}</td><td class="ex">${HAND_EX[t]}</td><td class="l">Lv${b.L+1}</td><td class="c">${b.c}</td><td>×</td><td class="m">${b.m}</td></tr>`}).join("")}</table>
  <div class="htN"><b>谁压谁</b><p>同一种牌型，点数大的压小的。</p><p>炸弹能压任何不是炸弹的牌。</p><p>炸弹之间：张数多的大；四炸 &lt; 五炸 &lt; 同花顺 &lt; 六炸 &lt; 七炸 &lt; 八炸 &lt; 天王炸。</p><p><b>大小</b>：2 3 … K A &lt; <b>级牌</b>（这一站是 ${rankName(lv)}）&lt; 小王 &lt; 大王</p><p><b class="hred">红桃${rankName(lv)}</b> 是逢人配，能当王以外的任何一张牌。</p><p>压住对手：倍率 ×1.5<br>压不住：×0.75</p></div></div><button class="btn" onclick="closeOv()">知道了</button></div>`)};

@@ -1,16 +1,31 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="1.0";
+const VER="1.1";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms/SPEED));
-const rnd=Math.random,ri=n=>Math.floor(rnd()*n),pick=a=>a[ri(a.length)];
+/* 随机数：平时用 Math.random；每日挑战用固定种子（G.rs），大家拿到一样的牌和商店 */
+function rnd(){if(typeof G!=="undefined"&&G&&G.daily&&G.rs!=null){let t=(G.rs=(G.rs+0x6D2B79F5)|0);t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}return Math.random()}
+const ri=n=>Math.floor(rnd()*n),pick=a=>a[ri(a.length)];
 let G=null; // 这一局
 SFX.drop=SFX.slide;SFX.bigwin=SFX.win;
 
 /* ---------- 画面适配：1280×720 的舞台，按窗口缩放 ---------- */
-function fit(){const st=$("#stage");const s=Math.min(innerWidth/1280,innerHeight/720);st.style.transform=`translate(-50%,-50%) scale(${s})`}
+/* 屏幕适配（照奶蛙之塔）：用真正看得见的那块区域（visualViewport），避开刘海和圆角；竖着拿手机时整个转过来 */
+function safeIn(){let p=document.getElementById("safeProbe");if(!p){p=document.createElement("div");p.id="safeProbe";p.style.cssText="position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)";document.body.appendChild(p)}const c=getComputedStyle(p);return{t:parseFloat(c.paddingTop)||0,r:parseFloat(c.paddingRight)||0,b:parseFloat(c.paddingBottom)||0,l:parseFloat(c.paddingLeft)||0}}
+function fit(){const vv=window.visualViewport;let W=innerWidth,H=innerHeight,ox=0,oy=0;if(vv&&vv.width>0&&vv.height>0){W=Math.min(W,vv.width);H=Math.min(H,vv.height);ox=vv.offsetLeft||0;oy=vv.offsetTop||0}
+ const de=document.documentElement;if(de.clientWidth>0)W=Math.min(W,de.clientWidth);if(de.clientHeight>0)H=Math.min(H,de.clientHeight);
+ const st=$("#stage");if(!st)return;const port=H>W*1.05;let sf={t:0,r:0,b:0,l:0};try{sf=safeIn()}catch(e){}
+ const aw=Math.max(100,W-sf.l-sf.r),ah=Math.max(100,H-sf.t-sf.b);st.style.left=(ox+sf.l+aw/2)+"px";st.style.top=(oy+sf.t+ah/2)+"px";
+ const s=port?Math.min(aw/720,ah/1280):Math.min(aw/1280,ah/720);st.style.transform=port?`translate(-50%,-50%) rotate(90deg) scale(${s})`:`translate(-50%,-50%) scale(${s})`;
+ document.body.classList.toggle("port",port);fit._k=innerWidth+"x"+innerHeight+(vv?"|"+vv.width+"x"+vv.height:"")}
+function fitSoon(){[60,250,600,1200,2500].forEach(t=>setTimeout(fit,t))}
+setInterval(()=>{const vv=window.visualViewport;if(fit._k!==innerWidth+"x"+innerHeight+(vv?"|"+vv.width+"x"+vv.height:""))fit()},700);
+if(window.visualViewport)visualViewport.addEventListener("resize",fit);addEventListener("orientationchange",fitSoon);
+addEventListener("load",()=>{try{if(window.toy&&toy.onContainerChange)toy.onContainerChange(()=>{fit();fitSoon()})}catch(e){}fitSoon()});
+/* 屏幕上的一块区域 → 舞台里的坐标（转过来的时候也算对） */
+function toStage(r){const st=$("#stage").getBoundingClientRect();if(document.body.classList.contains("port")){const s=st.height/1280;return{x:(r.top-st.top)/s,y:(st.right-r.right)/s,w:r.height/s,h:r.width/s}}const s=st.width/1280;return{x:(r.left-st.left)/s,y:(r.top-st.top)/s,w:r.width/s,h:r.height/s}}
 addEventListener("resize",fit);
 
 /* ---------- 牌 ---------- */
@@ -21,14 +36,24 @@ const PIPS={2:[[50,12],[50,88]],3:[[50,14],[50,50],[50,86]],4:[[29,14],[71,14],[
  6:[[29,14],[71,14],[29,50],[71,50],[29,86],[71,86]],7:[[29,14],[71,14],[50,32],[29,50],[71,50],[29,86],[71,86]],8:[[29,14],[71,14],[50,32],[29,50],[71,50],[50,68],[29,86],[71,86]],
  9:[[29,14],[71,14],[29,38],[71,38],[50,50],[29,62],[71,62],[29,86],[71,86]],10:[[29,14],[71,14],[50,26],[29,38],[71,38],[29,62],[71,62],[50,74],[29,86],[71,86]]};
 const COURT={11:"J",12:"Q",13:"K"};
+/* 每一张牌都有自己的奶蛙：♠ 奶蛙一家、♥ 奶猫一家、♣ 奶鸡一家、♦ 奶马一家。点数 2..10、J、Q、K、A 各是一只（"!" 结尾表示翻个面） */
+const CARD_ART={
+ 0:{2:"nw",3:"m2",4:"n2",5:"n3",6:"m4",7:"m5",8:"c2",9:"c3",10:"fj",11:"n1",12:"c4",13:"timefrog",14:"i5"},
+ 1:{2:"ct",3:"ctm",4:"ctl",5:"cty",6:"ctcc",7:"ct!",8:"ctm!",9:"ctl!",10:"cty!",11:"ctcc!",12:"ctar",13:"ctf",14:"ct"},
+ 2:{2:"ck",3:"ckg",4:"ckt",5:"ckb",6:"ckik",7:"cki",8:"ckr",9:"ckg!",10:"ckt!",11:"ckh",12:"ckar",13:"ckf",14:"ck"},
+ 3:{2:"hr",3:"hrg",4:"hrl",5:"hra",6:"hrc",7:"hrd",8:"hrw",9:"hrn",10:"hrz",11:"hrl!",12:"hrr",13:"hrar",14:"hr"}};
+function cardArt(c){const k=((CARD_ART[c.s]||{})[c.r])||FAMS[famOf(c)].img;return k.endsWith("!")?[k.slice(0,-1),1]:[k,0]}
+/* 数字牌的花色点：分在左右两列，单数多出来的那个放在最下面中间 */
+function sidePips(n){const out=[],h=Math.floor(n/2),col=(x,k)=>{for(let i=0;i<k;i++)out.push([x,k===1?52:30+46*i/(k-1)])};col(12,h);col(88,h);if(n%2)out.push([50,91]);return out}
 const suitSVG=(s,cls="")=>`<svg class="sv ${cls}" viewBox="0 0 100 100"><use href="#su${s}"/></svg>`;
 function cardHTML(c,opt={}){const lv=lvNow();if(c.hid&&opt.inHand)return`<div class="card back ${c.frz?"frz":""} ${opt.cls||""}" data-id="${c.id}" style="${opt.st||""}"><div class="cWob"><i class="cSh"></i><div class="cIn"><b>？</b></div></div></div>`;
  const W=isWild(c,lv),J=c.s===4,red=c.s===1||c.s===3||c.r===17;const F=FAMS[famOf(c)];
  const rk=J?(c.r===17?"大王":"小王"):rankName(c.r);let mid;
+ const art=cardArt(c);
  if(J)mid=`<div class="cArt"><img src="${IMG(JOKER_IMG[c.r])}" draggable="false"></div>`;
- else if(COURT[c.r])mid=`<div class="cCourt k${c.r}"><img src="${IMG(F.img)}" draggable="false"></div>`;
- else if(c.r===14)mid=`<div class="cAce">${suitSVG(c.s,"big")}</div>`;
- else mid=`<div class="cOne">${suitSVG(c.s,"big")}</div><div class="cPips">${(PIPS[c.r]||[]).map(([x,y])=>`<i style="left:${x}%;top:${y}%"${y>55?' class="dn"':""}>${suitSVG(c.s)}</i>`).join("")}</div>`;
+ else if(COURT[c.r])mid=`<div class="cCourt k${c.r}"><img src="${IMG(art[0])}" draggable="false"${art[1]?' class="fl"':""}></div>`;
+ else if(c.r===14)mid=`<div class="cAce"><span class="cAceS">${suitSVG(c.s,"big")}</span><img src="${IMG(art[0])}" draggable="false"></div>`;
+ else mid=`<div class="cFrog"><img src="${IMG(art[0])}" draggable="false"${art[1]?' class="fl"':""}></div>`;
  const kind=J?"jk":COURT[c.r]?"ct":c.r===14?"ac":"nm";
  return`<div class="card ${kind} ${red?"red":""} ${c.ed?"ed-"+c.ed:""} ${W?"wild":""} ${c.r===lv&&!J?"lvc":""} ${J?"joker":""} ${c.frz?"frz":""} ${c.mud?"mud":""} ${c.peek&&opt.inHand?"peek":""} ${opt.cls||""}" data-id="${c.id}" style="--fc:${F.c};${opt.st||""}">
  <div class="cWob"><i class="cSh"></i><div class="cIn"><i class="cBg"></i>
@@ -40,7 +65,7 @@ function cardHTML(c,opt={}){const lv=lvNow();if(c.hid&&opt.inHand)return`<div cl
 function sortHand(){const lv=lvNow();const key=c=>G.sortBy==="suit"?c.s*100+power(c.r,lv):power(c.r,lv)*10+c.s;G.hand.sort((a,b)=>key(b)-key(a))}
 
 /* ---------- 一局开始 ---------- */
-function newRun(hero,diff){hero=hero||"naiwa";diff=diff||0;G={hero,diff,lvIdx:0,blind:0,gold:diff>=3?0:4,deck:makeDeck().map(c=>({...c,ed:null,seal:null})),partners:[],hl:{},handsMax:4,discMax:3,handSize:10,sortBy:"rank",reroll:5,stats:{best:0,hands:0,types:{},beats:0},pst:{},foeSeed:ri(100)};
+function newRun(hero,diff){hero=hero||"naiwa";diff=diff||0;G={hero,diff,lvIdx:0,blind:0,gold:diff>=3?0:4,deck:makeDeck().map(c=>({...c,ed:null,seal:null})),partners:[],hl:{},handsMax:4,discMax:3,handSize:11,sortBy:"rank",reroll:5,stats:{best:0,hands:0,types:{},beats:0},pst:{},foeSeed:ri(100)};
 if(typeof HEROES!=="undefined"&&HEROES[hero]&&HEROES[hero].apply)HEROES[hero].apply(G);
  blindSelect()}
 function targetOf(lvIdx,b){const d=G&&G.diff||0;return Math.round(LV_BASE[lvIdx]*BLINDS[b].m*(1+(d>=1?.15:0)+(d>=6?.2:0))/10)*10}
@@ -142,7 +167,7 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
   if(c.ed==="foil"){x.chips+=30;popOn(el,"+30","chip");SFX.chip(k+2);setCM(x);await sleep(190)}
   if(c.ed==="poly"){x.mult=r1(x.mult*1.5);popOn(el,"×1.5","xm");SFX.xmult();setCM(x);await sleep(220)}
   if(c.en==="glass"){x.mult=r1(x.mult*2);popOn(el,"×2","xm");SFX.xmult();setCM(x);await sleep(220)}
-  if(c.en==="lucky"){if(Math.random()<.2){x.mult+=20;popOn(el,"幸运 +20 倍率","mult");SFX.mult(4);setCM(x);await sleep(220)}if(Math.random()<1/15){G.gold+=20;popOn(el,"幸运 +20 金币","gold");SFX.coins();renderSide2();await sleep(220)}}
+  if(c.en==="lucky"){if(rnd()<.2){x.mult+=20;popOn(el,"幸运 +20 倍率","mult");SFX.mult(4);setCM(x);await sleep(220)}if(rnd()<1/15){G.gold+=20;popOn(el,"幸运 +20 金币","gold");SFX.coins();renderSide2();await sleep(220)}}
   if(c.seal==="press"&&x.beat){x.mult+=10;popOn(el,"压印 +10 倍率","mult");SFX.mult(3);setCM(x);await sleep(200)}
   if(c.seal==="coin"&&!rp){const gv=G.partners.includes("ckg")?6:3;G.gold+=gv;popOn(el,`+${gv} 金币`,"gold");SFX.coin();await sleep(180)}
   }
@@ -150,6 +175,7 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
    for(const id of G.partners){const P=PARTNERS[id];if(P.burst){x.self=G.pst[id]=(G.pst[id]||{});const t=P.burst(x,f,G);if(t){partnerPulse(id,t);SFX.mult(2);renderSide2();setCM(x);await sleep(220)}}}}}}
  for(const c of G.hand){if(c.en==="steel"){x.mult=r1(x.mult*1.5);const el=$(`#hand .card[data-id="${c.id}"]`);popOn(el,"钢 ×1.5","xm");SFX.xmult();setCM(x);await sleep(200)}for(const id of G.partners){const P=PARTNERS[id];if(P.held){x.self=G.pst[id]=(G.pst[id]||{});const t=P.held(x,c,G);if(t){const el=$(`#hand .card[data-id="${c.id}"]`);popOn(el,t,popCls(t));partnerPulse(id);setCM(x);await sleep(190)}}}}
  for(const id of G.partners){const P=PARTNERS[id];if(P.hand){x.self=G.pst[id]=(G.pst[id]||{});const t=P.hand(x,G);if(t){partnerPulse(id,t);t.includes("×")?SFX.xmult():SFX.mult(3);setCM(x);await sleep(260)}}}
+ if(typeof extraHand==="function"){for(const t of (extraHand(x,G)||[])){popOn($("#setBar")||$("#partners"),t,popCls(t)+" big");t.includes("×")?SFX.xmult():SFX.mult(4);setCM(x);await sleep(320)}}
  if(B&&B.hand){const t=B.hand(x,G);if(t){toast(t);SFX.bad();setCM(x);await sleep(280)}}
  if(x.beat){const bx=x.beatX||1.5;x.mult=r1(x.mult*bx);SFX.beat();bigPop(`压住了！×${bx}`,"beat");bgKick(.4);foeSay(0);setCM(x);await sleep(460)}
  else if(x.noMiss){bigPop("盾斗士顶住了","beat");setCM(x);await sleep(360)}
@@ -162,7 +188,7 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
  G.lastX=x;G.streak=x.streak;G.lastType=x.type;if(x.beat)G.beatsThis=(G.beatsThis||0)+1;
  {const S=G.stats;S.hands++;S.best=Math.max(S.best,x.total);S.types[x.type]=(S.types[x.type]||0)+1;if(x.beat)S.beats++}
  if(B&&B.snowT&&x.beat)G.snow++;
- for(const c of order){if(c.en==="glass"&&c.seal!=="guard"&&Math.random()<.25&&!x.destroy.includes(c)){x.destroy.push(c);G.glassBroken=(G.glassBroken||0)+1;toast("玻璃牌碎了")}}
+ for(const c of order){if(c.en==="glass"&&c.seal!=="guard"&&rnd()<.25&&!x.destroy.includes(c)){x.destroy.push(c);G.glassBroken=(G.glassBroken||0)+1;toast("玻璃牌碎了")}}
  if(x.destroy.length){const ds=new Set(x.destroy);G.deck=G.deck.filter(c=>!ds.has(c));$$("#table .card").forEach((e,i)=>{if(ds.has(order[i]))e.classList.add("boom")});SFX.bad();bgKick(.6);toast(`${x.destroy.length} 张牌被移出了牌组（还剩 ${G.deck.length} 张）`);await sleep(500)}
 
  G.first=false;tb.classList.add("out");await sleep(300);tb.innerHTML="";tb.classList.remove("out");
@@ -203,7 +229,7 @@ async function foeKO(){const im=$(".foeImg");if(!im)return;foeSay(2);im.classLis
 function setCM(x){const c=$("#hChips"),m=$("#hMult");c.textContent=Math.round(x.chips).toLocaleString();m.textContent=r1(x.mult).toLocaleString();[c,m].forEach(e=>{e.classList.remove("pump");void e.offsetWidth;e.classList.add("pump")});
  const hot=x.chips*x.mult>=G.target*.5;c.classList.toggle("fire",hot);m.classList.toggle("fire",hot)}
 async function countScore(t){const s0=G.score,el=$("#scoreN");const N=22;for(let i=1;i<=N;i++){G.score=Math.round(s0+t*(1-Math.pow(1-i/N,3)));el.textContent=G.score.toLocaleString();hpSet();if(i%3===0)SFX.chip(i/3);await sleep(26)}const bar=$(".sdScore .bar");if(bar)bar.style.width=Math.min(100,G.score/G.target*100)+"%"}
-function stagePt(el){const r=el.getBoundingClientRect(),st=$("#stage").getBoundingClientRect(),s=st.width/1280;return{x:(r.left+r.width/2-st.left)/s,y:(r.top-st.top)/s}}
+function stagePt(el){const R=toStage(el.getBoundingClientRect());return{x:R.x+R.w/2,y:R.y}}
 function popOn(el,t,cls){if(!el)return;const p=stagePt(el);const d=document.createElement("div");d.className="pop "+cls;d.textContent=t;d.style.left=p.x+"px";d.style.top=(p.y-6)+"px";$("#fx").appendChild(d);setTimeout(()=>d.remove(),900)}
 function bigPop(t,cls=""){const d=document.createElement("div");d.className="bigPop "+cls;d.textContent=t;$("#fx").appendChild(d);setTimeout(()=>d.remove(),1150)}
 function partnerPulse(id,t){const i=G.partners.indexOf(id);const el=$$("#partners .pCard")[i];if(!el)return;el.classList.remove("pulse");void el.offsetWidth;el.classList.add("pulse");G.chainN=(G.chainN||0)+1;SFX.chain(G.chainN);if(t)popOn(el,t,popCls(t)+" big")}
@@ -277,7 +303,7 @@ function tiltOn(el){if(!el||el._tilt)return;el._tilt=1;const mv=e=>{const r=el.g
 function ov(h){const o=$("#ov");o.innerHTML=h;o.classList.add("on")}
 function closeOv(){const o=$("#ov");o.classList.remove("on");o.innerHTML=""}
 function toast(h){const t=$("#toast");t.innerHTML=h;t.classList.remove("on");void t.offsetWidth;t.classList.add("on");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("on"),2200)}
-function tip(el,h){closeTip();const p=stagePt(el),r=el.getBoundingClientRect(),s=$("#stage").getBoundingClientRect().width/1280;const d=document.createElement("div");d.id="tip";d.innerHTML=h;d.style.left=Math.min(1010,p.x-60)+"px";d.style.top=(p.y+r.height/s+10)+"px";$("#stage").appendChild(d);setTimeout(()=>addEventListener("pointerdown",tipOff,true),10)}
+function tip(el,h){closeTip();const R=toStage(el.getBoundingClientRect());const d=document.createElement("div");d.id="tip";d.innerHTML=h;d.style.left=Math.min(1010,R.x+R.w/2-60)+"px";d.style.top=(R.y+R.h+10)+"px";$("#stage").appendChild(d);setTimeout(()=>addEventListener("pointerdown",tipOff,true),10)}
 function tipOff(e){if(e.target.closest("#tip"))return;closeTip()}
 function closeTip(){const d=$("#tip");if(d)d.remove();removeEventListener("pointerdown",tipOff,true)}
 function handTable(){SFX.click();ov(`<div class="box htBox"><h2>牌型</h2><table>${HAND_ORDER.map(t=>{const b=handBase(t);return`<tr><td>${HANDS[t].n}</td><td class="l">Lv${b.L+1}</td><td class="c">${b.c}</td><td>×</td><td class="m">${b.m}</td></tr>`}).join("")}</table><p class="htN">炸弹张数越多越大；同花顺在五炸和六炸之间。<br>压住上家（同牌型更大，或者用炸弹）：这一手倍率 ×1.5。</p><button class="btn" onclick="closeOv()">知道了</button></div>`)}

@@ -26,7 +26,7 @@ const FU={
  s1:{n:"红桃符",need:[1,3],d:"选中的最多 3 张变成红桃 ♥",use:cs=>{cs.forEach(c=>{if(c.s<4)c.s=1});return"变成了红桃"}},
  s2:{n:"梅花符",need:[1,3],d:"选中的最多 3 张变成梅花 ♣",use:cs=>{cs.forEach(c=>{if(c.s<4)c.s=2});return"变成了梅花"}},
  s3:{n:"方块符",need:[1,3],d:"选中的最多 3 张变成方块 ♦",use:cs=>{cs.forEach(c=>{if(c.s<4)c.s=3});return"变成了方块"}},
- copy:{n:"复印符",need:[1,1],d:"复制选中的 1 张牌（连品质、增强、印一起），放进牌组和手里",use:cs=>{const c={...cs[0],id:1e6+Math.floor(Math.random()*1e9)};G.deck.push(c);G.hand.push(c);return"复制了一张"}},
+ copy:{n:"复印符",need:[1,1],d:"复制选中的 1 张牌（连品质、增强、印一起），放进牌组和手里",use:cs=>{const c={...cs[0],id:1e6+Math.floor(rnd()*1e9)};G.deck.push(c);G.hand.push(c);return"复制了一张"}},
  wild:{n:"万能符",need:[1,1],d:"选中的 1 张永久变成逢人配",use:cs=>{cs[0].wild=1;return"变成了逢人配"}},
  up:{n:"升点符",need:[1,2],d:"选中的最多 2 张点数 +1（A 变成 2）",use:cs=>{cs.forEach(c=>{if(c.s<4)c.r=c.r>=14?2:c.r+1});return"点数 +1"}},
  same:{n:"照影符",need:[2,2],d:"选 2 张：右边那张变成左边那张的点数（凑炸弹好帮手）",use:cs=>{cs.sort((a,b)=>G.hand.indexOf(a)-G.hand.indexOf(b));if(cs[1].s<4&&cs[0].s<4)cs[1].r=cs[0].r;return"点数变得一样了"}},
@@ -36,20 +36,20 @@ const FU={
  cham:{n:"变色符",need:[1,2],d:"选中的最多 2 张变成变色牌（算作任何花色）",use:cs=>{cs.forEach(c=>c.en="cham");return"变成了变色牌"}},
  lucky:{n:"幸运符",need:[1,2],d:"选中的最多 2 张变成幸运牌",use:cs=>{cs.forEach(c=>c.en="lucky");return"变成了幸运牌"}},
  ice:{n:"冰心符",need:[1,1],d:"选中的 1 张变成冰心牌（留得越久越值钱）",use:cs=>{cs[0].en="ice";cs[0].age=0;return"变成了冰心牌"}},
- seal:{n:"盖印符",need:[1,1],d:"给选中的 1 张盖一个随机的印",use:cs=>{const k=["coin","echo","press","guard","summon","frog"][Math.floor(Math.random()*6)];cs[0].seal=k;return`盖上了${SEALS[k].n}`}},
- ed:{n:"镀光符",need:[1,1],d:"选中的 1 张随机变成闪卡、金卡或彩卡",use:cs=>{const q=Math.random();cs[0].ed=q<.5?"foil":q<.8?"gold":"poly";return`变成了${EDS[cs[0].ed].n}`}},
+ seal:{n:"盖印符",need:[1,1],d:"给选中的 1 张盖一个随机的印",use:cs=>{const k=["coin","echo","press","guard","summon","frog"][Math.floor(rnd()*6)];cs[0].seal=k;return`盖上了${SEALS[k].n}`}},
+ ed:{n:"镀光符",need:[1,1],d:"选中的 1 张随机变成闪卡、金卡或彩卡",use:cs=>{const q=rnd();cs[0].ed=q<.5?"foil":q<.8?"gold":"poly";return`变成了${EDS[cs[0].ed].n}`}},
  money:{n:"财神符",need:[0,0],d:"金币翻倍（最多 +20）",any:1,use:()=>{const v=Math.min(20,G.gold);G.gold+=v;return`+${v} 金币`}},
  tea:{n:"茶道符",need:[0,0],d:"上一次出的牌型升 1 级（没出过就升对子）",any:1,use:()=>{const t=teaKey(G.lastType||G.lastTea||"pair");G.hl[t]=(G.hl[t]||0)+1;return`${t==="bomb"?"炸弹":HANDS[t].n} 升级了`}},
- friend:{n:"招友符",need:[0,0],d:"随机得到一个普通伙伴（要有空位）",any:1,ok:()=>G.partners.length<(G.pmax||5),use:()=>{const p=Object.keys(PARTNERS).filter(k=>PARTNERS[k].r==="C"&&!G.partners.includes(k)&&isUnlocked(k));const k=p[Math.floor(Math.random()*p.length)];G.partners.push(k);return`${PARTNERS[k].n} 加入了`}},
+ friend:{n:"招友符",need:[0,0],d:"随机得到一个普通伙伴（要有空位）",any:1,ok:()=>G.partners.length<(G.pmax||5),use:()=>{const p=Object.keys(PARTNERS).filter(k=>PARTNERS[k].r==="C"&&!G.partners.includes(k)&&isUnlocked(k));const k=p[Math.floor(rnd()*p.length)];G.partners.push(k);return`${PARTNERS[k].n} 加入了`}},
  more:{n:"续命符",need:[0,0],d:"这一关出牌 +1（只能在打牌时用）",play:1,use:()=>{G.handsLeft++;return"出牌 +1"}},
  redraw:{n:"洗牌符",need:[0,0],d:"把整手牌换掉重新抓，不花弃牌次数（只能在打牌时用）",play:1,use:()=>{const keep=G.hand.filter(c=>c.frz||c.mud);G.hand.filter(c=>!keep.includes(c)).forEach(c=>G.draw.unshift(c));G.hand=keep;G.newIds=new Set();drawTo();return"换了一手新牌"}}};
 /* ---------- 秘宝（相当于幽灵牌）：很强，但都有代价 ---------- */
 const MB={
- mirror:{n:"魔镜",d:"复制一个随机伙伴（要有空位），但金币清零",any:1,ok:()=>G.partners.length&&G.partners.length<(G.pmax||5),use:()=>{const k=G.partners[Math.floor(Math.random()*G.partners.length)];G.partners.push(k);G.gold=0;return`复制了 ${PARTNERS[k].n}`}},
+ mirror:{n:"魔镜",d:"复制一个随机伙伴（要有空位），但金币清零",any:1,ok:()=>G.partners.length&&G.partners.length<(G.pmax||5),use:()=>{const k=G.partners[Math.floor(rnd()*G.partners.length)];G.partners.push(k);G.gold=0;return`复制了 ${PARTNERS[k].n}`}},
  hole:{n:"黑洞",d:"所有牌型都升 1 级",any:1,use:()=>{Object.keys(TEA).forEach(t=>G.hl[t]=(G.hl[t]||0)+1);return"所有牌型升级了"}},
- alch:{n:"炼金炉",need:[1,1],d:"选 1 张：复制 2 张一样的，但随机删掉手里另外 1 张",use:cs=>{for(let i=0;i<2;i++){const c={...cs[0],id:1e6+Math.floor(Math.random()*1e9)};G.deck.push(c);G.hand.push(c)}const o=G.hand.filter(c=>c!==cs[0]&&c.id!==cs[0].id&&!G.hand.slice(-2).includes(c));if(o.length){const d=o[Math.floor(Math.random()*o.length)];G.deck=G.deck.filter(x=>x!==d);G.hand=G.hand.filter(x=>x!==d)}return"复制了 2 张"}},
- soul:{n:"灵魂",d:"随机得到一个传说伙伴，但手牌上限 -1",any:1,ok:()=>G.partners.length<(G.pmax||5),use:()=>{const p=Object.keys(PARTNERS).filter(k=>PARTNERS[k].r==="L"&&!G.partners.includes(k));const k=p[Math.floor(Math.random()*p.length)];G.partners.push(k);G.handSize=Math.max(6,G.handSize-1);return`${PARTNERS[k].n} 来了`}},
- ruin:{n:"毁灭",d:"随机删掉牌组里 6 张牌，+15 金币",any:1,use:()=>{for(let i=0;i<6;i++){const c=G.deck[Math.floor(Math.random()*G.deck.length)];G.deck=G.deck.filter(x=>x!==c);G.hand=G.hand.filter(x=>x!==c)}G.gold+=15;return"牌组少了 6 张，+15 金币"}},
+ alch:{n:"炼金炉",need:[1,1],d:"选 1 张：复制 2 张一样的，但随机删掉手里另外 1 张",use:cs=>{for(let i=0;i<2;i++){const c={...cs[0],id:1e6+Math.floor(rnd()*1e9)};G.deck.push(c);G.hand.push(c)}const o=G.hand.filter(c=>c!==cs[0]&&c.id!==cs[0].id&&!G.hand.slice(-2).includes(c));if(o.length){const d=o[Math.floor(rnd()*o.length)];G.deck=G.deck.filter(x=>x!==d);G.hand=G.hand.filter(x=>x!==d)}return"复制了 2 张"}},
+ soul:{n:"灵魂",d:"随机得到一个传说伙伴，但手牌上限 -1",any:1,ok:()=>G.partners.length<(G.pmax||5),use:()=>{const p=Object.keys(PARTNERS).filter(k=>PARTNERS[k].r==="L"&&!G.partners.includes(k));const k=p[Math.floor(rnd()*p.length)];G.partners.push(k);G.handSize=Math.max(6,G.handSize-1);return`${PARTNERS[k].n} 来了`}},
+ ruin:{n:"毁灭",d:"随机删掉牌组里 6 张牌，+15 金币",any:1,use:()=>{for(let i=0;i<6;i++){const c=G.deck[Math.floor(rnd()*G.deck.length)];G.deck=G.deck.filter(x=>x!==c);G.hand=G.hand.filter(x=>x!==c)}G.gold+=15;return"牌组少了 6 张，+15 金币"}},
  midas:{n:"点金手",need:[1,1],d:"选 1 张变成金卡，并盖上金币印",use:cs=>{cs[0].ed="gold";cs[0].seal="coin";return"变成了金卡"}},
  void:{n:"无相",need:[1,1],d:"选 1 张：变成逢人配，也变成双生牌",use:cs=>{cs[0].wild=1;cs[0].en="twin";return"它什么都能当了"}},
  throne:{n:"王座",d:"出牌永久 +1，弃牌永久 -1",any:1,use:()=>{G.handsMax++;G.discMax=Math.max(0,G.discMax-1);return"出牌 +1，弃牌 -1"}},
@@ -111,8 +111,8 @@ function consUse(i){const k=G.cons[i],D=consDef(k);const [ok,why]=consCanUse(k);
  const cs=(D.need&&D.need[1]>0)?selCards():[];const t=D.use(cs);G.cons.splice(i,1);for(const id of G.partners){const P=PARTNERS[id];if(P.onCons){G.pst[id]=G.pst[id]||{};P.onCons(G.pst[id],k,G);partnerPulse(id)}}G.sel.clear();SFX.shine();bgKick(.5);toast(`<b>${D.n}</b>：${t}`);
  if($("#play.on")){sortHand();render()}else{renderSide();renderPartners();if($("#shop.on"))shopRender()}renderCons()}
 function consGive(k){G.cons=G.cons||[];if(G.cons.length>=CONS_MAX){toast("符咒栏满了");return false}G.cons.push(k);renderCons();return true}
-const randFu=()=>{const k=Object.keys(FU);return k[Math.floor(Math.random()*k.length)]};
-const randMb=()=>{const k=Object.keys(MB);return k[Math.floor(Math.random()*k.length)]};
+const randFu=()=>{const k=Object.keys(FU);return k[Math.floor(rnd()*k.length)]};
+const randMb=()=>{const k=Object.keys(MB);return k[Math.floor(rnd()*k.length)]};
 
 /* 打开符咒卡包 / 秘宝卡包：挑一张，直接用或者收进符咒栏 */
 function openFuPack(it){return new Promise(res=>{const mb=it.k==="mbpack";const ks=[];while(ks.length<it.n){const k=mb?randMb():randFu();if(!ks.includes(k))ks.push(k)}
@@ -121,7 +121,7 @@ function openFuPack(it){return new Promise(res=>{const mb=it.k==="mbpack";const 
 
 /* ---------- 接进游戏 ---------- */
 // 卡包里的牌：有时带增强、带新的印
-{const _r=rollCard;rollCard=function(g){const c=_r(g);if(c.s<4&&Math.random()<.22)c.en=ENH_KEYS[Math.floor(Math.random()*ENH_KEYS.length)];if(c.seal&&Math.random()<.7)c.seal=SEAL_KEYS[Math.floor(Math.random()*SEAL_KEYS.length)];return c}}
+{const _r=rollCard;rollCard=function(g){const c=_r(g);if(c.s<4&&rnd()<.22)c.en=ENH_KEYS[Math.floor(rnd()*ENH_KEYS.length)];if(c.seal&&rnd()<.7)c.seal=SEAL_KEYS[Math.floor(rnd()*SEAL_KEYS.length)];return c}}
 // 牌面上显示增强和印
 {const _c=cardHTML;cardHTML=function(c,opt={}){let h=_c(c,opt);if(c.hid&&opt.inHand)return h;
  if(c.en)h=h.replace('class="card ',`class="card en-${c.en} `).replace('<i class="cFoil">',`<i class="cEn">${ENH[c.en].g}${c.en==="ice"&&c.age?`<small>${c.age}</small>`:""}</i><i class="cFoil">`);
@@ -131,8 +131,8 @@ function openFuPack(it){return new Promise(res=>{const mb=it.k==="mbpack";const 
 // 商店：多一张符咒、偶尔有秘宝，卡包种类轮换
 {const _o=shopOpen;shopOpen=function(){_o();const S_=G.shop;S_.items=S_.items.filter(it=>it.k==="partner"||it.k==="tea");
  S_.items.push({k:"fu",id:randFu(),p:3});
- const packs=[{k:"pack",id:"card",p:4,n:4},{k:"pack",id:"gold",p:6,n:3},{k:"teapack",p:4,n:3},{k:"fupack",p:4,n:3}];if(Math.random()<.22)packs.push({k:"mbpack",p:7,n:2});
- shuffleArr(packs).slice(0,2).forEach(p=>S_.items.push(p));if(Math.random()<.08)S_.items[4]={k:"mb",id:randMb(),p:6};shopRender()}}
+ const packs=[{k:"pack",id:"card",p:4,n:4},{k:"pack",id:"gold",p:6,n:3},{k:"teapack",p:4,n:3},{k:"fupack",p:4,n:3}];if(rnd()<.22)packs.push({k:"mbpack",p:7,n:2});
+ shuffleArr(packs).slice(0,2).forEach(p=>S_.items.push(p));if(rnd()<.08)S_.items[4]={k:"mb",id:randMb(),p:6};shopRender()}}
 {const _r=shopRender;shopRender=function(){_r();const row=$("#shop .shRow");if(!row)return;
  G.shop.items.forEach((it,i)=>{if(it.sold)return;if(!["fu","mb","fupack","mbpack"].includes(it.k))return;const el=row.children[i];if(!el)return;
   if(it.k==="fu"||it.k==="mb"){const D=consDef(it.id);el.className="shItem fuItem";el.innerHTML=`${consHTML(it.id,"big")}<p>${D.d}</p><div class="price">${packP(it)}</div>`}
