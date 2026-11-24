@@ -117,7 +117,7 @@ function render(){renderSide();renderPartners();renderLv();renderUpper();renderP
 function renderSide(){const B=BLINDS[G.blind],boss=G.boss&&BOSSES[G.boss];const inShop=$("#shop.on");
  $("#side").innerHTML=`<div class="sdBlind ${boss?"boss":""}"><div class="sdBl"><img src="${IMG((G.foe||foeOf(G.lvIdx,G.blind)).img)}"></div><div class="sdBlInfo"><small>${inShop?"下一关":B.n}</small><div>${(G.foe||foeOf(G.lvIdx,G.blind)).n}</div><b>${(G.target||targetOf(G.lvIdx,G.blind)).toLocaleString()}<i style="font-style:normal;font-size:12px"> 血</i></b></div></div>
  ${boss&&!inShop?`<div class="sdBoss">${boss.d}</div>`:""}
- <div class="sdScore pan"><small>已经<br>打掉</small><div class="num"><span id="scoreN">${(inShop?0:G.score||0).toLocaleString()}</span><i class="bar" style="width:${inShop?0:Math.min(100,(G.score||0)/(G.target||1)*100)}%"></i></div></div>
+ <div class="sdScore pan"><small>已经<br>打掉</small><div class="num"><span id="scoreN">${(inShop?0:G.score||0).toLocaleString()}</span><i class="bar" style="width:${inShop?0:Math.min(100,(G.score||0)/(G.target||1)*100)}%"></i></div><div class="runDmg">本局总伤害 <b id="runDmgN">${((G.stats&&G.stats.dmg)||0).toLocaleString()}</b></div></div>
  <div class="sdHand"><div id="hName">${inShop?"商店":"选几张牌"}</div><div class="cm"><b class="c" id="hChips">0</b><i>×</i><b class="m" id="hMult">0</b></div></div>
  <div class="sdRow"><div class="sdCnt h"><small>出牌</small><b>${inShop?G.handsMax:G.handsLeft}</b></div><div class="sdCnt d"><small>弃牌</small><b>${inShop?G.discMax:G.discLeft}</b></div></div>
  <div class="sdRow"><div class="sdGold"><small>金币</small><b>${G.gold}</b></div><div class="sdLv"><small>打几 · 第 ${G.lvIdx+1}/${LV_LIST.length} 级</small><b>${rankName(LV_LIST[G.lvIdx])}</b><em>${G.lvOff?"级牌失效了":"红桃"+rankName(LV_LIST[G.lvIdx])+" 逢人配"}</em></div></div>
@@ -228,7 +228,7 @@ async function foeKO(){const im=$(".foeImg");if(!im)return;foeSay(2);im.classLis
 /* ---------- 算分动画 ---------- */
 function setCM(x){const c=$("#hChips"),m=$("#hMult");c.textContent=Math.round(x.chips).toLocaleString();m.textContent=r1(x.mult).toLocaleString();[c,m].forEach(e=>{e.classList.remove("pump");void e.offsetWidth;e.classList.add("pump")});
  const hot=x.chips*x.mult>=G.target*.5;c.classList.toggle("fire",hot);m.classList.toggle("fire",hot)}
-async function countScore(t){const s0=G.score,el=$("#scoreN");const N=22;for(let i=1;i<=N;i++){G.score=Math.round(s0+t*(1-Math.pow(1-i/N,3)));el.textContent=G.score.toLocaleString();hpSet();if(i%3===0)SFX.chip(i/3);await sleep(26)}const bar=$(".sdScore .bar");if(bar)bar.style.width=Math.min(100,G.score/G.target*100)+"%"}
+async function countScore(t){const s0=G.score,el=$("#scoreN");const N=22;for(let i=1;i<=N;i++){G.score=Math.round(s0+t*(1-Math.pow(1-i/N,3)));el.textContent=G.score.toLocaleString();hpSet();{const rd=$("#runDmgN");if(rd)rd.textContent=(((G.stats&&G.stats.dmg)||0)+G.score-s0).toLocaleString()}if(i%3===0)SFX.chip(i/3);await sleep(26)}const bar=$(".sdScore .bar");if(bar)bar.style.width=Math.min(100,G.score/G.target*100)+"%"}
 function stagePt(el){const R=toStage(el.getBoundingClientRect());return{x:R.x+R.w/2,y:R.y}}
 function popOn(el,t,cls){if(!el)return;const p=stagePt(el);const d=document.createElement("div");d.className="pop "+cls;d.textContent=t;d.style.left=p.x+"px";d.style.top=(p.y-6)+"px";$("#fx").appendChild(d);setTimeout(()=>d.remove(),900)}
 function bigPop(t,cls=""){const d=document.createElement("div");d.className="bigPop "+cls;d.textContent=t;$("#fx").appendChild(d);setTimeout(()=>d.remove(),1150)}
