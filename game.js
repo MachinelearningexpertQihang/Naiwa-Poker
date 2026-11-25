@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="2.1";
+const VER="2.2";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -166,14 +166,13 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
   el&&el.classList.remove("hit");void(el&&el.offsetWidth);el&&el.classList.add("hit");
   const cc=cardChips(c,lv)+(c.en==="ice"?(G.partners.includes("nx")?30:15)*(c.age||0):0);x.chips+=cc;popOn(el,"+"+cc,"chip");SFX.chip(k);setCM(x);await sleep(190);
   if(c.ed==="foil"){x.chips+=30;popOn(el,"+30","chip");SFX.chip(k+2);setCM(x);await sleep(190)}
-  if(c.ed==="poly"){const px=polyX(G);x.mult=r1(x.mult*px);popOn(el,"彩虹 ×"+px,"xm");SFX.xmult();setCM(x);await sleep(220)}
+  if(c.ed==="poly"){x.mult=r1(x.mult*1.5);popOn(el,"×1.5","xm");SFX.xmult();setCM(x);await sleep(220)}
   if(c.en==="glass"){x.mult=r1(x.mult*2);popOn(el,"×2","xm");SFX.xmult();setCM(x);await sleep(220)}
   if(c.en==="lucky"){if(rnd()<.2){x.mult+=20;popOn(el,"幸运 +20 倍率","mult");SFX.mult(4);setCM(x);await sleep(220)}if(rnd()<1/15){G.gold+=20;popOn(el,"幸运 +20 金币","gold");SFX.coins();renderSide2();await sleep(220)}}
   if(c.seal==="press"&&x.beat){x.mult+=10;popOn(el,"压印 +10 倍率","mult");SFX.mult(3);setCM(x);await sleep(200)}
   if(c.seal==="coin"&&!rp){const gv=G.partners.includes("ckg")?6:3;G.gold+=gv;popOn(el,`+${gv} 金币`,"gold");SFX.coin();await sleep(180)}
   for(const id of G.partners){const P=PARTNERS[id];if(P.card){x.self=G.pst[id]=(G.pst[id]||{});let t;try{t=P.card(x,c,G)}catch(e){}if(t){x.mult=r1(x.mult);popOn(el,t,popCls(t));partnerPulse(id);t.includes("×")?SFX.xmult():SFX.mult(2);setCM(x);await sleep(190)}}}
   }
-  if(typeof cardXP==="function")await cardXP(c,el,x);
   c.age=0;const n=1+(c.seal==="frog"?1:0)+G.partners.filter(id=>PARTNERS[id].poolX).length;for(let q=0;q<n;q++){const got=poolAdd(famOf(c));renderPool(true);for(const f of got){x.bursts++;applyBurst(f,x);SFX.burst();bgKick(.25);popOn($("#pool"),`${FAMS[f].n}消除：${FAMS[f].burst}`,"burst");renderSide2();setCM(x);await sleep(300);
    for(const id of G.partners){const P=PARTNERS[id];if(P.burst){x.self=G.pst[id]=(G.pst[id]||{});const t=P.burst(x,f,G);if(t){partnerPulse(id,t);SFX.mult(2);renderSide2();setCM(x);await sleep(220)}}}}}}
  for(const c of G.hand){if(c.en==="steel"){x.mult=r1(x.mult*1.5);const el=$(`#hand .card[data-id="${c.id}"]`);popOn(el,"钢 ×1.5","xm");SFX.xmult();setCM(x);await sleep(200)}for(const id of G.partners){const P=PARTNERS[id];if(P.held){x.self=G.pst[id]=(G.pst[id]||{});const t=P.held(x,c,G);if(t){const el=$(`#hand .card[data-id="${c.id}"]`);popOn(el,t,popCls(t));partnerPulse(id);setCM(x);await sleep(190)}}}}

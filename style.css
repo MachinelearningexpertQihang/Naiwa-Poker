@@ -809,24 +809,10 @@ body.port{background:#0a0508}
 body.lite .cWob,body.lite .pCard,body.lite .flip:not(.open),body.lite .bsCard.now,body.lite .mtWho img,body.lite .foeImg img,body.lite #bgimg .bgL.kb,body.lite .pcShine,body.lite .mbRing,body.lite .ed-poly .cFoil,body.lite .pc.rL .pcIn,body.lite .pcSpk b,body.lite .tLogo b{animation:none!important}
 body.lite .pcHolo,body.lite .pcSpk{display:none}
 body.lite *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-/* 2.1 牌会长大 */
-.cXp{position:absolute;left:5px;bottom:5px;width:17px;height:17px;border-radius:50%;z-index:6;pointer-events:none;background:conic-gradient(#6fd0ff calc(var(--p)*360deg),rgba(0,0,0,.28) 0);box-shadow:0 0 0 2px #fff}
-.cXp::after{content:"";position:absolute;inset:4px;border-radius:50%;background:#fff}
-.cXp.t2{background:conic-gradient(#ff7ad9,#ffd23f,#6fff9a,#6fd0ff,#b07bff calc(var(--p)*360deg),rgba(0,0,0,.28) 0)}
-.ed-poly .cIn{box-shadow:inset 0 0 0 3px #fff}
-.ed-poly .cIn::before{content:"";position:absolute;inset:0;border-radius:9px;padding:4px;background:linear-gradient(135deg,#ff5ad2,#ffd23f,#5aff8a,#3fd0ff,#b05aff,#ff5ad2);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;z-index:5;pointer-events:none}
-.card.lvUp .cIn{animation:lvUp .6s ease}
-@keyframes lvUp{0%{filter:brightness(1)}30%{filter:brightness(1.8) saturate(1.4);transform:scale(1.12)}100%{filter:brightness(1);transform:scale(1)}}
-.ciTag.up{background:linear-gradient(90deg,#ff7ad9,#ffd23f,#6fd0ff);color:#2a1020}
-/* 澡堂 */
-.shItem.bath .bathArt{position:relative;width:96px;height:70px;margin:6px auto 4px}
-.bathArt b{position:absolute;left:8px;right:8px;bottom:6px;height:30px;border-radius:0 0 30px 30px;background:linear-gradient(#fff,#cfe9ff);box-shadow:inset 0 -4px 0 #9cc8ee,0 3px 0 rgba(0,0,0,.35)}
-.bathArt i{position:absolute;bottom:30px;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:inset -3px -3px 0 rgba(150,200,255,.7)}
-.bathArt i:nth-child(1){left:22px}.bathArt i:nth-child(2){left:40px;bottom:38px;width:20px;height:20px}.bathArt i:nth-child(3){left:62px}
-.bathBox{width:900px;max-width:96%}.bathSub{opacity:.8;margin:4px 0 10px}
-.bathGrid{display:flex;flex-wrap:wrap;gap:6px;max-height:440px;overflow:auto;justify-content:center;padding:6px}
-.bathC{width:62px;height:87px;position:relative;cursor:pointer}
-.bathC .card{position:absolute;left:0;top:0;transform:scale(.646);transform-origin:0 0;margin:0}
-.bathC:hover{outline:3px solid var(--gold);border-radius:8px}
-.bigPop.upg{font-size:46px;top:218px;color:#dff4ff;text-shadow:3px 3px 0 #2a5a9a,6px 6px 0 rgba(0,0,0,.55)}
-.bigPop.upg.rb{color:#fff;text-shadow:3px 3px 0 #c43fa0,6px 6px 0 rgba(0,0,0,.55)}
+
+/* 2.2 彩虹伙伴 */
+.pc.rbw .pcIn::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:4px;background:linear-gradient(135deg,#ff5ad2,#ffd23f,#5aff8a,#3fd0ff,#b05aff,#ff5ad2);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;z-index:6;pointer-events:none}
+.pc.rbw{filter:drop-shadow(0 0 6px rgba(255,140,230,.55))}
+.rbTag{position:absolute;left:50%;top:-12px;transform:translateX(-50%);z-index:8;padding:1px 10px;border-radius:9px;font-size:13px;color:#2a1020;background:linear-gradient(90deg,#ff7ad9,#ffd23f,#6fff9a,#6fd0ff,#b07bff);box-shadow:0 2px 0 rgba(0,0,0,.4)}
+.shItem.rbItem{position:relative}
+.rbTxt{color:#ff9be6;font-size:inherit}
