@@ -73,7 +73,7 @@ const pedCand=k=>G.partners.filter(id=>!pedHas(id,k));
 // 秘宝「彩虹颜料」：只在秘宝里出（秘宝卡包、商店偶尔的秘宝）
 MB.rbpaint={n:"彩虹颜料",d:"随机把一个伙伴染成彩虹（原来的品质还在，可以叠加）",any:1,ok:()=>pedCand("rb").length>0,use:()=>{const id=pick(pedCand("rb"));pedGive(id,"rb");try{renderPartners()}catch(e){}return`${PARTNERS[id].n} 变成彩虹了`}};
 // 首领进贡：偶尔多一个"给伙伴上品质"的选项
-{const _t=tribute;tribute=function(k){return new Promise(res=>{_t(k).then(res);try{if(!G||!G.partners.length)return;const r=rnd();const q=r<.06?"rb":r<.36?"foil":null;if(!q)return;const c=pedCand(q);if(!c.length)return;const id=pick(c);
+{const _t=tribute;tribute=function(k){return new Promise(res=>{_t(k).then(res);try{if(!G||!G.partners.length)return;const r=rnd();const q=r<.06*pedLate("rb")?"rb":r<.06*pedLate("rb")+.30*pedLate("foil")?"foil":null;if(!q)return;const c=pedCand(q);if(!c.length)return;const id=pick(c);
  const box=document.querySelector(".tribBox");const sk=$("#trSkip");if(!box||!sk)return;sk.insertAdjacentHTML("beforebegin",`<button class="btn ${q==="rb"?"rbBtn":"gold"}" id="trPed">不要牌，让 ${PARTNERS[id].n} ${q==="rb"?"染成彩虹":"镀上闪光"}</button>`);
  $("#trPed").onclick=()=>{pedGive(id,q);SFX.shine();closeOv();try{renderPartners()}catch(e){}toast(`<b>${PARTNERS[id].n}</b> ${q==="rb"?"变成彩虹了":"镀上了闪光"}`);res(null)}}catch(e){console.warn(e)}})}}
 // 路上事件：彩虹泉
