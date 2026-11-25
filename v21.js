@@ -91,6 +91,8 @@ Object.assign(PARTNERS,{
  r_tx:{t:"彩虹",n:"沾光奶蛙",img:"u_tx",r:"R",p:6,d:"它左边挨着的那个伙伴也算彩虹（可以拖动调位置）"}});
 SETS_OFF["彩虹"]={d:"彩虹伙伴的 ×1.5 再 +0.5"};
 
-/* ---------- 2.2 后期首领更难：第 7 站起首领血量逐站多加 7% ---------- */
-{const _tg=targetOf;targetOf=function(lv,b){const t=_tg(lv,b);if(b!==2||lv<6||(G&&G.endless&&(G.loop||1)>1))return t;return Math.round(t*(1+.07*(lv-5))/10)*10}}
+/* ---------- 2.2 后期首领更难 ---------- */
+// 第 7 站起首领再大加：第 7 站 +50%，一路加到最后一站 +150%（在上面逐站 7% 的基础上）
+const BOSS_LATE=[1.5,1.6,1.7,1.8,1.95,2.15,2.5];
+{const _tg=targetOf;targetOf=function(lv,b){const t=_tg(lv,b);if(b!==2||lv<6||(G&&G.endless&&(G.loop||1)>1))return t;return Math.round(t*(1+.07*(lv-5))*(BOSS_LATE[lv-6]||2.5)/10)*10}}
 try{FU_G.rbpaint="彩";FU_ICON.rbpaint='<path d="M8 46a24 24 0 0 1 48 0" fill="none" stroke="#ff5ad2" stroke-width="5"/><path d="M14 46a18 18 0 0 1 36 0" fill="none" stroke="#ffd23f" stroke-width="5"/><path d="M20 46a12 12 0 0 1 24 0" fill="none" stroke="#5aff8a" stroke-width="5"/><path d="M26 46a6 6 0 0 1 12 0" fill="none" stroke="#3fd0ff" stroke-width="5"/>'}catch(e){}
