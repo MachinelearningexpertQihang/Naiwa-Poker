@@ -1,6 +1,6 @@
 /* ===================== 奶蛙牌 · 主程序 ===================== */
 "use strict";
-const VER="2.2";
+const VER="2.3";
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const IMG=k=>"img/"+k+".webp";
 let SPEED=1;
@@ -167,6 +167,7 @@ async function playSel(){const cs=selCards();const lv=lvNow();if(!cs.length||G.b
   const cc=cardChips(c,lv)+(c.en==="ice"?(G.partners.includes("nx")?30:15)*(c.age||0):0);x.chips+=cc;popOn(el,"+"+cc,"chip");SFX.chip(k);setCM(x);await sleep(190);
   if(c.ed==="foil"){x.chips+=30;popOn(el,"+30","chip");SFX.chip(k+2);setCM(x);await sleep(190)}
   if(c.ed==="poly"){x.mult=r1(x.mult*1.5);popOn(el,"×1.5","xm");SFX.xmult();setCM(x);await sleep(220)}
+  if(c.bath&&typeof bathFx==="function")await bathFx(c,el,x,rp);
   if(c.en==="glass"){x.mult=r1(x.mult*2);popOn(el,"×2","xm");SFX.xmult();setCM(x);await sleep(220)}
   if(c.en==="lucky"){if(rnd()<.2){x.mult+=20;popOn(el,"幸运 +20 倍率","mult");SFX.mult(4);setCM(x);await sleep(220)}if(rnd()<1/15){G.gold+=20;popOn(el,"幸运 +20 金币","gold");SFX.coins();renderSide2();await sleep(220)}}
   if(c.seal==="press"&&x.beat){x.mult+=10;popOn(el,"压印 +10 倍率","mult");SFX.mult(3);setCM(x);await sleep(200)}

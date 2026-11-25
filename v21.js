@@ -98,3 +98,33 @@ SETS_OFF["彩虹"]={d:"彩虹伙伴的 ×1.5 再 +0.5"};
 const BOSS_LATE=[1.5,1.6,1.7,1.8,1.95,2.15,2.5];
 {const _tg=targetOf;targetOf=function(lv,b){const t=_tg(lv,b);if(b!==2||lv<6||(G&&G.endless&&(G.loop||1)>1))return t;return Math.round(t*(1+.07*(lv-5))*(BOSS_LATE[lv-6]||2.5)/10)*10}}
 try{FU_G.rbpaint="彩";FU_ICON.rbpaint='<path d="M8 46a24 24 0 0 1 48 0" fill="none" stroke="#ff5ad2" stroke-width="5"/><path d="M14 46a18 18 0 0 1 36 0" fill="none" stroke="#ffd23f" stroke-width="5"/><path d="M20 46a12 12 0 0 1 24 0" fill="none" stroke="#5aff8a" stroke-width="5"/><path d="M26 46a6 6 0 0 1 12 0" fill="none" stroke="#3fd0ff" stroke-width="5"/>'}catch(e){}
+
+/* ===================== 2.3：奶蛙澡堂回来了（只给扑克牌，加的都是一点点） =====================
+   商店大约三次出现一次，一次泡一张牌；每张牌只能泡一次，泡出来什么随机 */
+const BATH={
+ m3:{n:"倍率 +3",w:40,d:"计分时 倍率 +3"},
+ c20:{n:"筹码 +20",w:30,d:"计分时 筹码 +20"},
+ g1:{n:"+1 金币",w:15,d:"打出时 +1 金币"},
+ lk:{n:"碰运气",w:15,d:"计分时 1/4 几率 倍率 +10"}};
+function bathRoll(){const ks=Object.keys(BATH);let r=rnd()*ks.reduce((a,k)=>a+BATH[k].w,0);for(const k of ks){r-=BATH[k].w;if(r<0)return k}return"m3"}
+async function bathFx(c,el,x,rp){const b=BATH[c.bath];if(!b)return;
+ if(c.bath==="m3"){x.mult+=3;popOn(el,"泡 +3 倍率","mult")}
+ else if(c.bath==="c20"){x.chips+=20;popOn(el,"泡 +20","chip")}
+ else if(c.bath==="g1"){if(rp)return;G.gold+=1;popOn(el,"泡 +1 金币","gold");try{renderSide2()}catch(e){}}
+ else if(c.bath==="lk"){if(rnd()>=.25)return;x.mult+=10;popOn(el,"泡 运气好 +10 倍率","mult")}
+ try{SFX.chip(3)}catch(e){}setCM(x);await sleep(170)}
+// 牌角的小「泡」字 + 长按说明
+{const _c=cardHTML;cardHTML=function(c,opt={}){let h=_c(c,opt);try{if(c&&c.bath&&BATH[c.bath]&&!(c.hid&&opt.inHand))h=h.replace('<i class="cFoil">','<i class="cBath">泡</i><i class="cFoil">')}catch(e){}return h}}
+{const _ci=cardInfoHTML;cardInfoHTML=function(c){let h=_ci(c);try{if(c&&c.bath&&BATH[c.bath])h+=`<p class="ciTag bath">泡过澡</p><p>${BATH[c.bath].d}</p>`}catch(e){}return h}}
+// 商店
+{const _o=shopOpen;shopOpen=async function(){const r=await _o.apply(this,arguments);try{if(G&&G.shop&&!G.shop.bathRolled){G.shop.bathRolled=1;if(rnd()<.34){const its=G.shop.items;let j=-1;its.forEach((it,i)=>{if(/pack/.test(it.k))j=i});if(j>=0){its[j]={k:"bath2",p:5+Math.floor((G.lvIdx||0)/3)};shopRender()}}}}catch(e){console.warn(e)}return r}}
+{const _r=shopRender;shopRender=function(){const r=_r.apply(this,arguments);try{const row=$("#shop .shRow");if(row)G.shop.items.forEach((it,i)=>{if(it.k!=="bath2"||it.sold)return;const el=row.children[i];if(!el)return;
+ el.className="shItem bath";el.innerHTML=`<span class="kind">澡堂</span><div class="bathArt"><i></i><i></i><i></i><b></b></div><b>奶蛙澡堂</b><p>挑 1 张牌泡一泡<br>随机泡出一点小好处<br>（每张牌只能泡一次）</p><div class="price">${packP(it)}</div>`})}catch(e){console.warn(e)}return r}}
+{const _b=shopBuy;shopBuy=async function(i){const it=G.shop.items[i];if(!it||it.k!=="bath2")return _b.apply(this,arguments);if(it.sold)return;
+ const price=packP(it);if(G.gold<price){toast("金币不够");SFX.bad();return}bathPick(it,price)}}
+function bathPick(it,price){const lv=lvNow();const cs=G.deck.filter(c=>c.s!==undefined&&!c.bath).sort((a,b)=>a.s-b.s||power(b.r,lv)-power(a.r,lv));
+ if(!cs.length){toast("牌组里的牌都泡过了");return}
+ ov(`<div class="box bathBox"><h2>奶蛙澡堂</h2><p class="bathSub">挑一张牌泡一泡（${price} 金币）。泡出来的可能是：倍率 +3、筹码 +20、打出时 +1 金币、或者 1/4 几率倍率 +10。</p><div class="bathGrid">${cs.map(c=>`<div class="bathC" data-id="${c.id}">${cardHTML(c)}</div>`).join("")}</div><div class="askBtns"><button class="btn dark" id="bathNo">算了</button></div></div>`);
+ $("#bathNo").onclick=()=>{SFX.click();closeOv()};
+ $$(".bathC").forEach(e=>e.onclick=()=>{const c=cs.find(q=>String(q.id)===e.dataset.id);if(!c||G.gold<price)return;G.gold-=price;it.sold=1;c.bath=bathRoll();SFX.shine();closeOv();shopRender();
+  toast(`<b>${c.s===4?(c.r===17?"大王":"小王"):(SUITS[c.s]||"")+" "+rankName(c.r)}</b> 泡完澡：${BATH[c.bath].d}`)})}

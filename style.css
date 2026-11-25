@@ -834,3 +834,16 @@ body.lite .pedRb{animation:none}
 .rbTxt{color:#ff9be6;font-size:inherit}
 .btn.rbBtn{background:linear-gradient(90deg,#ff7ad9,#ffd23f,#6fff9a,#6fd0ff,#b07bff);color:#2a1020}
 .rbTxt.sh{font-size:11px;line-height:1.35}
+
+/* 2.3 奶蛙澡堂 */
+.cBath{position:absolute;left:5px;bottom:5px;z-index:6;width:18px;height:18px;border-radius:50%;background:#dff1ff;color:#2a6aa8;font-size:11px;line-height:18px;text-align:center;font-style:normal;box-shadow:0 0 0 2px #fff,0 1px 0 rgba(0,0,0,.3);pointer-events:none}
+.ciTag.bath{background:#cfe9ff;color:#1d3a5a}
+.shItem.bath .bathArt{position:relative;width:96px;height:70px;margin:6px auto 4px}
+.bathArt b{position:absolute;left:8px;right:8px;bottom:6px;height:30px;border-radius:0 0 30px 30px;background:linear-gradient(#fff,#cfe9ff);box-shadow:inset 0 -4px 0 #9cc8ee,0 3px 0 rgba(0,0,0,.35)}
+.bathArt i{position:absolute;bottom:30px;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.9);box-shadow:inset -3px -3px 0 rgba(150,200,255,.7)}
+.bathArt i:nth-child(1){left:22px}.bathArt i:nth-child(2){left:40px;bottom:38px;width:20px;height:20px}.bathArt i:nth-child(3){left:62px}
+.bathBox{width:900px;max-width:96%}.bathSub{opacity:.8;margin:4px 0 10px}
+.bathGrid{display:flex;flex-wrap:wrap;gap:6px;max-height:420px;overflow:auto;justify-content:center;padding:6px}
+.bathC{width:62px;height:87px;position:relative;cursor:pointer}
+.bathC .card{position:absolute;left:0;top:0;transform:scale(.646);transform-origin:0 0;margin:0}
+.bathC:hover{outline:3px solid var(--gold);border-radius:8px}
