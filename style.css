@@ -847,3 +847,15 @@ body.lite .pedRb{animation:none}
 .bathC{width:62px;height:87px;position:relative;cursor:pointer}
 .bathC .card{position:absolute;left:0;top:0;transform:scale(.646);transform-origin:0 0;margin:0}
 .bathC:hover{outline:3px solid var(--gold);border-radius:8px}
+
+/* 2.3 泡过澡的牌：微微发光，颜色看泡出了什么 */
+.card.bathed{--bg:rgba(150,215,255,.85)}
+.card.bath-m3{--bg:rgba(255,150,200,.85)}
+.card.bath-c20{--bg:rgba(130,200,255,.85)}
+.card.bath-g1{--bg:rgba(255,215,90,.9)}
+.card.bath-lk{--bg:rgba(140,240,160,.85)}
+.card.bathed .cIn{box-shadow:inset 0 0 0 2px var(--bg),inset 0 0 14px var(--bg),0 0 10px var(--bg)!important}
+.cSteam{position:absolute;inset:0;z-index:4;pointer-events:none;border-radius:inherit;background:radial-gradient(ellipse 60% 35% at 50% 100%,var(--bg),transparent 70%);opacity:.45;animation:steamB 3.2s ease-in-out infinite}
+@keyframes steamB{0%,100%{opacity:.3}50%{opacity:.55}}
+body.lite .cSteam{animation:none;opacity:.4}
+.cBath{background:var(--bg,#dff1ff)!important;color:#1d1418!important}

@@ -114,7 +114,7 @@ async function bathFx(c,el,x,rp){const b=BATH[c.bath];if(!b)return;
  else if(c.bath==="lk"){if(rnd()>=.25)return;x.mult+=10;popOn(el,"泡 运气好 +10 倍率","mult")}
  try{SFX.chip(3)}catch(e){}setCM(x);await sleep(170)}
 // 牌角的小「泡」字 + 长按说明
-{const _c=cardHTML;cardHTML=function(c,opt={}){let h=_c(c,opt);try{if(c&&c.bath&&BATH[c.bath]&&!(c.hid&&opt.inHand))h=h.replace('<i class="cFoil">','<i class="cBath">泡</i><i class="cFoil">')}catch(e){}return h}}
+{const _c=cardHTML;cardHTML=function(c,opt={}){let h=_c(c,opt);try{if(c&&c.bath&&BATH[c.bath]&&!(c.hid&&opt.inHand))h=h.replace('class="card ','class="card bathed bath-'+c.bath+' ').replace('<i class="cFoil">','<i class="cBath">泡</i><i class="cSteam"></i><i class="cFoil">')}catch(e){}return h}}
 {const _ci=cardInfoHTML;cardInfoHTML=function(c){let h=_ci(c);try{if(c&&c.bath&&BATH[c.bath])h+=`<p class="ciTag bath">泡过澡</p><p>${BATH[c.bath].d}</p>`}catch(e){}return h}}
 // 商店
 {const _o=shopOpen;shopOpen=async function(){const r=await _o.apply(this,arguments);try{if(G&&G.shop&&!G.shop.bathRolled){G.shop.bathRolled=1;if(rnd()<.34){const its=G.shop.items;let j=-1;its.forEach((it,i)=>{if(/pack/.test(it.k))j=i});if(j>=0){its[j]={k:"bath2",p:5+Math.floor((G.lvIdx||0)/3)};shopRender()}}}}catch(e){console.warn(e)}return r}}
