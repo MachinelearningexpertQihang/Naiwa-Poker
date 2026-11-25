@@ -30,7 +30,9 @@ function rbOwn(G){if(!G||!G.partners)return[];pedMig();const out=G.partners.filt
 const rbX=G=>1.5+(G.partners.includes("r_qc")?.25:0)+(setOn(G,"彩虹")?.5:0);
 function pedTxt(k,id,fam){const f=fam!=null?fam:((G.pedF||{})[id]||0);return PED[k].d.replace("{f}",SUIT_FAM[f]).replace("{x}",G?rbX(G):1.5)}
 function pedPrice(ks,base){ks=pedArr(ks);if(!ks.length)return base;let p=ks.includes("rb")?base*2+3:base;ks.forEach(k=>{if(k!=="rb")p+=PED[k].add});if(G&&G.partners.includes("r_by"))p-=3;return Math.max(base,p)}
-function pedRoll(){const m=G&&G.partners.includes("r_lg")?2:1;return PED_K.filter(k=>rnd()<PED[k].p*m)}
+// 第 7 站起品质更容易刷到：每站 +15%（彩虹只 +8%，还是难拿）
+const pedLate=k=>{const n=Math.max(0,((G&&G.lvIdx)||0)-5);return 1+n*(k==="rb"?.08:.15)};
+function pedRoll(){const m=G&&G.partners.includes("r_lg")?2:1;return PED_K.filter(k=>rnd()<PED[k].p*m*pedLate(k))}
 // 伙伴丢了：清掉品质；负色走了伙伴位也收回
 function pedClean(){if(!G)return;pedMig();for(const k in G.ped)if(!G.partners.includes(k)){delete G.ped[k];delete G.pedF[k]}
  const n=G.partners.filter(id=>pedHas(id,"neg")).length;if((G._negN||0)>n){G.pmax=Math.max(5,(G.pmax||5)-((G._negN||0)-n))}G._negN=Math.min(G._negN||0,n)}
